@@ -1,3 +1,67 @@
+
+
+########################
+##   Java ignores     ## 
+########################
+
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+
+########################
+##  Eclipse ignores   ## 
+########################
+
+*.pydevproject
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+
+# Eclipse created dot-directories
+.classpath
+.project
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin
+.target
+
+# TeXlipse plugin
+.texlipse
+
+
+########################
+##    C ignores       ## 
+########################
+
 # Object files
 *.o
 *.ko
@@ -21,3 +85,4 @@
 *.i*86
 *.x86_64
 *.hex
+
