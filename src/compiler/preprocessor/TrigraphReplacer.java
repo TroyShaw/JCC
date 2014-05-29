@@ -1,4 +1,4 @@
-package compiler.preprocessing;
+package compiler.preprocessor;
 
 import util.StringBufferUtil;
 

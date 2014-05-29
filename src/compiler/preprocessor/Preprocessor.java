@@ -1,4 +1,4 @@
-package compiler.preprocessing;
+package compiler.preprocessor;
 
 /**
  * Class performs preprocessing on a series of compilation units.

@@ -1,4 +1,4 @@
-package compiler.preprocessing;
+package compiler.preprocessor;
 
 /**
  * Represents the various trigraph replacement strings.

@@ -1,4 +1,4 @@
-package compiler.preprocessing;
+package compiler.preprocessor;
 
 /**
  * Class handles the replacement of Digraphs within a C program.
