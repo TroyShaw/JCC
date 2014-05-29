@@ -2,7 +2,7 @@ package compiler.lexer.token;
 
 import compiler.lexer.Keyword;
 
-public class KeywordToken {
+public class KeywordToken extends Token {
 
 	public KeywordToken(Keyword keyword) {
 		

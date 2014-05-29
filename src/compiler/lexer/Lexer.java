@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import compiler.lexer.token.EscapeCharacter;
+import compiler.lexer.token.KeywordToken;
 import compiler.lexer.token.Literal;
 import compiler.lexer.token.LiteralToken;
+import compiler.lexer.token.OperatorToken;
 import compiler.lexer.token.Token;
 
 
@@ -44,8 +46,11 @@ public class Lexer {
     	
     	if (c == '\'') return scanCharLiteral();
 		if (c == '"')  return scanStringLiteral();
+		if (matchesOperator()) return scanOperator();
+		if (isDigit(c)) return scanNumericLiteral();
 		
-		throw syntaxError("unknown token encountered");
+		//only thing left is keywords and identifiers
+		return scanWord();
 	}
 	
 	private LiteralToken scanStringLiteral() {
@@ -98,6 +103,48 @@ public class Lexer {
     	}
     	
     	throw syntaxError("unrecognised escape character");
+	}
+	
+	private boolean isDigit(char c) {
+		return '0' <= c && c <= '9';
+	}
+	
+	private LiteralToken scanNumericLiteral() {
+		//TODO
+		return null;
+	}
+	
+	private Token scanWord() {
+		//first try keywords
+		
+		for (Keyword k : Keyword.values()) {
+			if (h.matches(k.getString())) {
+				return new KeywordToken(k);
+			}
+		}
+		
+		//must be identifier
+		//TODO
+		
+		throw syntaxError("Invalid Identifier");
+	}
+	
+	private boolean matchesOperator() {
+		for (Operator o : Operator.values()) {
+			if (h.matches(o.getString())) return true;
+		}
+		
+		return false;
+	}
+	
+	private OperatorToken scanOperator() {
+		for (Operator o : Operator.values()) {
+			if (h.matches(o.getString())) {
+				return new OperatorToken(o);
+			}
+		}
+		
+		throw syntaxError("Unknown operator ");
 	}
 	
 	private RuntimeException syntaxError(String error) {
