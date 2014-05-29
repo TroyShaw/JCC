@@ -1,7 +1,5 @@
 package compiler.lexer;
 
-import java.io.IOException;
-
 /**
  * Encapsulates the process of character/ string access to simplify the process of lexing.
  * 
@@ -12,8 +10,12 @@ public class LexerHelper {
 	private StringBuffer input;
 	private int pos;
 
-	public LexerHelper(String text) throws IOException {
-        input = new StringBuffer(text);
+	public LexerHelper(String text) {
+		input = new StringBuffer(text);
+	}
+	
+	public LexerHelper(StringBuffer buffer) {
+		input = buffer;
 	}
 	
     /**
@@ -25,8 +27,6 @@ public class LexerHelper {
      * @return true if there is a match
      */
     public boolean matches(String toMatch) {
-    	nullCheck(toMatch);
-    	
         int index = input.indexOf(toMatch, pos);
 
         return index != -1 && index == pos;
@@ -188,14 +188,5 @@ public class LexerHelper {
      */
     public void resetPosition() {
     	pos = 0;
-    }
-    
-    /**
-     * Internal helper to check a value isn't null.
-     * 
-     * @param o
-     */
-    private void nullCheck(Object o) {
-    	if (o == null) throw new NullPointerException();
     }
 }
