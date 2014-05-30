@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import compiler.lexer.token.EscapeCharacter;
+import compiler.lexer.token.IdentifierToken;
 import compiler.lexer.token.KeywordToken;
 import compiler.lexer.token.Literal;
 import compiler.lexer.token.LiteralToken;
@@ -105,10 +106,6 @@ public class Lexer {
     	throw syntaxError("unrecognised escape character");
 	}
 	
-	private boolean isDigit(char c) {
-		return '0' <= c && c <= '9';
-	}
-	
 	private LiteralToken scanNumericLiteral() {
 		//TODO
 		return null;
@@ -123,10 +120,23 @@ public class Lexer {
 			}
 		}
 		
-		//must be identifier
-		//TODO
+		// Must be identifier
+		// Valid identifier [_a-zA-Z][_a-zA-Z0-9]*
+		String identifier = "";
 		
-		throw syntaxError("Invalid Identifier");
+		char c = h.peekChar();
+		
+		if (!isIdentifierStart(c)) {
+			syntaxError("invalid identifier start.");
+		}
+		
+		identifier += c;
+		
+		while (isIdentifierRest(h.peekChar())) {
+			identifier += h.consumeChar();
+		}
+		
+		return new IdentifierToken(identifier);
 	}
 	
 	private boolean matchesOperator() {
@@ -145,6 +155,18 @@ public class Lexer {
 		}
 		
 		throw syntaxError("Unknown operator ");
+	}
+	
+	private boolean isDigit(char c) {
+		return '0' <= c && c <= '9';
+	}
+	
+	private boolean isIdentifierStart(char c) {
+		return c == '_' || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+	}
+	
+	private boolean isIdentifierRest(char c) {
+		return isIdentifierStart(c) || isDigit(c);
 	}
 	
 	private RuntimeException syntaxError(String error) {
