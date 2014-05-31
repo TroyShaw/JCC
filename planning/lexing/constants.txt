@@ -1,0 +1,125 @@
+Document contains details on lexing various constants in C
+
+
+Four main constants in C
+
+ - string
+ - char
+ - integer
+ - floating
+
+
+
+integer constant
+=======
+
+Grammar
+-------
+
+integer-constant:
+    | decimal-constant integer-suffix(opt)
+    | octal-constant intgger-suffix(opt)
+    | hexadecimal-constant integer_suffix(opt)
+
+decimal-constant:
+    | nonzero-digit
+    | decimal-constant digit
+
+octal-constant:
+    | 0
+    | octal-constant octal-digit
+
+hexadecimal-constant:
+    | hexadecimal-prefix hexadecimal-digit
+    | hexadecimal-constant hexadecimal-digit
+
+
+hexadecimal-prefix: 0x, 0X
+hexadecimal-digit: nonzero-digits, a, b, c, d, e, f, A, B, C, D, E, F
+nonzero-digit: 1, 2, 3, 4, 5, 6, 7, 8, 9
+octal-digit: 0, 1, 2, 3, 4, 5, 6, 7
+
+integer-suffix:
+    | unsigned-suffix long-suffix(opt)
+    | unsigned-suffix long-long-suffix(opt)
+    | long-suffix unsigned-suffix(opt)
+    | long-long-suffix unsigned-suffix(opt)
+
+unsigned-suffix: u, U
+long-suffix: l, L
+long-long-suffix: ll, LL
+
+
+Explanation
+-----------
+
+Basically three forms, base 10, base 7 octal, and base 16 hexidecimal.
+Hexidecimal integers start with either 0x or 0X and then have any decimal number or letters a-f or A-F as described above.
+Octal integers start with 0, then have any number of 0-7 after that. This means the constant 0 is an octal constant.
+Decimal constants are those that are left, start with 1-9, then any number of digits 1-9 after that.
+
+Every integer constant can also have an optional integer suffix, as described in the grammar above.
+
+Valid combinations are:
+    u, U, l, L, ll, LL
+    ul, uL, Ul, UL
+    ull, uLL, Ull, ULL
+    lu, lU, Lu, LU
+    llu, llU, LLu, LLU
+
+
+floating constant
+=================
+
+Grammar
+-------
+
+floating-constant:
+    | decimal-floating-constant
+    | hexadecimal-floating-constant
+
+decimal-floating-constant:
+    | fractional-constant exponent-part(opt) floating-suffix(opt)
+    | digit-sequence exponent-part floating-suffix(opt)
+
+hexadecimal-floating-constant:
+    | hexadecimal-prefix hexadecimal-fractional-constant binary-exponent-part floating-suffix(opt)
+    | hexadecimal-prefix hexadecimal-digit-sequence binary-exponent-part floating-suffix(opt)
+
+fractional-constant:
+    | digit-sequence(opt) . digit-sequence
+    | digit-sequence .
+
+exponent-part:
+    | e sign(opt) digit-sequence
+    | E sign(opt) digit-sequence
+
+digit-sequence:
+    | digit 
+    | digit-sequence digit
+
+hexadecimal-fractional-constant:
+    | hexadecimal-digit-sequence(opt) . hexadecimal-digit-sequence
+    | hexadecimal-digit-sequence .
+
+binary-expression-part:
+    | p sign(opt) digit-sequence
+    | P sign(opt) digit-sequence
+
+hexadecimal-digit-sequence:
+    | hexadecimal-digit
+    | hexadecimal-digit-sequence hexadecimal-digit
+
+floating-suffix: f, F, l, L
+
+sign: +, -
+
+
+
+char constant
+=============
+
+
+
+string constant
+===============

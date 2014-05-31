@@ -47,8 +47,8 @@ public class Lexer {
     	
     	if (c == '\'') return scanCharLiteral();
 		if (c == '"')  return scanStringLiteral();
-		if (matchesOperator()) return scanOperator();
 		if (isDigit(c)) return scanNumericLiteral();
+		if (matchesOperator()) return scanOperator();
 		
 		//only thing left is keywords and identifiers
 		return scanWord();
@@ -66,10 +66,15 @@ public class Lexer {
 			
 			buffer.append(c);
 		}
-		
+
 		throw syntaxError("Reached EOF while parsing string literal.");
 	}
-	
+
+	/**
+	 * Scans a c char literal.
+	 * 
+	 * @return
+	 */
 	private LiteralToken scanCharLiteral() {
 		h.consume("'");
 		char c = scanChar();
@@ -107,7 +112,29 @@ public class Lexer {
 	}
 	
 	private LiteralToken scanNumericLiteral() {
+		
 		//TODO
+		return null;
+	}
+	
+	/**
+	 * Scans a c integer constant.
+	 * 
+	 * @return
+	 */
+	private LiteralToken scanIntegerConstant() {
+		if (h.tryConsume("0x") || h.tryConsume("0X")) {
+			//hexidecimal constant
+		} else if (h.tryConsume("0")) {
+			//octal constant
+		} else {
+			//normal integer constant
+		}
+		
+		return null;
+	}
+	
+	private LiteralToken scanFloatingConstant() {
 		return null;
 	}
 	
