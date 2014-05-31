@@ -1,0 +1,73 @@
+This document describes at a high level all the tasks involved in creating JCC.
+It also details what has been done, and what is yet to do.
+
+Key
+===
+
+x - task name
+o - task name
+
+x - denotes the task is yet to be completed
+o - denotes the task has been completed
+
+
+Preprocessing
+=============
+
+o - trigraphs
+x - digraphs
+x - main preprocessing directives (to outline later)
+
+Lexing
+======
+
+o - token OO representation
+
+o - operators/ syntactical tokens
+o - Keywords
+o - Identifiers
+
+x - numerical literals
+    x - octal
+    x - hexidecimal
+    x - integer
+
+o - string literal
+o - char literals
+
+x - all escape sequences supported (\n, \t, \b, etc)
+
+x - unicode? (not sure if this is part of the standard or not)
+
+x - write tests
+x - tidy up code, refactor, document
+
+Parsing
+=======
+
+x - Convert List<Token> to AST
+
+
+Type Checking
+===============
+
+to outline later
+
+
+Optimisation
+============
+
+constant folding
+rest to outline later
+
+
+Code Generation
+===============
+
+Decide what platform to output for. Also what target. LLVM? GCC AT&T assembly?
+
+
+Standard Library
+================
+
+Do I write it from scratch or reuse a FOS implementation?
