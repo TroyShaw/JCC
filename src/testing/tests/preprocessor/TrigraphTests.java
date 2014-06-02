@@ -13,6 +13,6 @@ public class TrigraphTests {
 
 	
 	private void runTrigraphTest(String baseTestName) {
-		new TestHarness(new TrigraphTestRunner(), baseTestName + ".c", baseTestName + ".output");
+		new TestHarness(new TrigraphTestRunner(), baseTestName + ".c", baseTestName + ".output").runTest();
 	}
 }
