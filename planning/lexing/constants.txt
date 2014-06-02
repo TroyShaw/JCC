@@ -115,11 +115,62 @@ floating-suffix: f, F, l, L
 sign: +, -
 
 
+Explanation
+-----------
+
+
 
 char constant
 =============
 
+Grammar
+-------
 
+character-constant:
+    | ' c-char-sequence '
+    | L' c-char-sequence '
+
+c-char-sequence:
+    | c-char
+    | c-char-sequence c-char
+
+c-char:
+    | any character except ', \, or newline
+    | escape-sequence
+
+escape-sequence:
+    simple-escape-sequence
+    octal-escape-sequence
+    hexidecimal-escape-sequence
+    universal-character-name
+
+simple-escape-sequence:
+    \', \", \?, \\, \a, \b, \f, \n, \r, \t, \v
+
+octal-escape-sequence:
+    | \ octal-digit
+    | \ octal-digit octal-digit
+    | \ octal-digit octal-digit octal-digit
+
+hexadecimal-escape-sequence:
+    | \x hexadecimal-digit
+    | hexadecimal-escape-sequence hexadecimal-digit
+
+
+Description
+-----------
 
 string constant
 ===============
+
+string-literal:
+    | " s-char-sequence(opt) "
+    | L" s-char-sequence(opt) "
+
+s-char-sequence:
+    | s-char
+    | s-char-sequence s-char
+
+s-char:
+    | any character except ", \, or newline
+    | escape-sequence

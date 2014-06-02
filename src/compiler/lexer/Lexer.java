@@ -3,12 +3,13 @@ package compiler.lexer;
 import java.util.ArrayList;
 import java.util.List;
 
+import compiler.lexer.token.CharacterToken;
 import compiler.lexer.token.EscapeCharacter;
 import compiler.lexer.token.IdentifierToken;
 import compiler.lexer.token.KeywordToken;
-import compiler.lexer.token.Literal;
 import compiler.lexer.token.LiteralToken;
 import compiler.lexer.token.OperatorToken;
+import compiler.lexer.token.StringToken;
 import compiler.lexer.token.Token;
 
 
@@ -54,7 +55,14 @@ public class Lexer {
 		return scanWord();
 	}
 	
+	/**
+	 * Scans a string literal.
+	 * 
+	 * @return
+	 */
 	private LiteralToken scanStringLiteral() {
+		boolean isWide = h.tryConsume("L");
+		
 		h.consume("\"");
 		
 		StringBuffer buffer = new StringBuffer();
@@ -62,7 +70,7 @@ public class Lexer {
 		while (h.hasChar()) {
 			char c = scanChar();
 			
-			if (c == '"') return new LiteralToken(buffer.toString(), Literal.String);
+			if (c == '"') return new StringToken(buffer.toString(), isWide);
 			
 			buffer.append(c);
 		}
@@ -71,16 +79,26 @@ public class Lexer {
 	}
 
 	/**
-	 * Scans a c char literal.
+	 * Scans a character literal.
 	 * 
 	 * @return
 	 */
 	private LiteralToken scanCharLiteral() {
-		h.consume("'");
-		char c = scanChar();
-		h.consume("'");
+		boolean isWide = h.tryConsume("L");
 		
-		return new LiteralToken(Character.toString(c), Literal.Character);
+		h.consume("\'");
+		
+		StringBuffer buffer = new StringBuffer();
+		
+		while (h.hasChar()) {
+			char c = scanChar();
+			
+			if (c == '\'') return new CharacterToken(buffer.toString(), isWide);
+			
+			buffer.append(c);
+		}
+
+		throw syntaxError("Reached EOF while parsing char literal.");
 	}
 	
     /**
@@ -107,6 +125,8 @@ public class Lexer {
     			return esChar.getEscapedChar();
     		}
     	}
+    	
+    	//TODO: unicode, octal, hex constants, etc
     	
     	throw syntaxError("unrecognised escape character");
 	}
@@ -181,7 +201,7 @@ public class Lexer {
 			}
 		}
 		
-		throw syntaxError("Unknown operator ");
+		throw syntaxError("Unknown operator");
 	}
 	
 	private boolean isDigit(char c) {
