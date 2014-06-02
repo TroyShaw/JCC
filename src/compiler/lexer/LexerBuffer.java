@@ -33,6 +33,22 @@ public class LexerBuffer {
     }
     
     /**
+     * Returns true if any of the given strings match. 
+     * Equivalent to calling the matches() function on each string individually, and
+     * returning the first true, or false otherwise.
+     * 
+     * @param toMatch
+     * @return
+     */
+    public boolean matches(String ... toMatch) {
+    	for (String s : toMatch) {
+    		if (matches(s)) return true;
+    	}
+    	
+    	return false;
+    }
+    
+    /**
      * Consumes the given string.
      * 
      * If the string is not directly present, an error is thrown.

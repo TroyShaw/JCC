@@ -1,0 +1,82 @@
+This document describes the rational for the ordering in which tokens are lexed.
+
+
+Tokens
+======
+
+There are a few main classes of tokens in the C language:
+    
+    literal tokens
+        character-based literals
+            char literals
+            string literals
+        numerical literals
+            integer literals
+            floating literals
+    punctuator tokens
+    word tokens
+        keyword tokens
+        idenfitifer tokens
+
+The order we lex the tokens in matters.
+
+
+Orderings
+=========
+
+We must check for floating values before integer values.
+
+Floating values can be of the form <integer constant> '.' <integer constant>, e.g 234.0234
+If we were to lex integers first, we would lex int(234) punctuator(.) int(0234), which is wrong.
+
+Ordering constraint (floating, integer)
+
+
+We must check character-based literals before identifier tokens.
+Character-based literals can be preceeded with the L width specifier, which could be lexed as an identifier.
+Example L"Hello, World" would be lexed as identifier(L), stringLiteral(Hello, World).
+
+Ordering constraint (character-based literals, word tokens).
+
+
+Floating points can be of the form . <integer constant> e.g. .123
+If we lex punctuators first, we will lex punctuator(.) int(123).
+
+Ordering constraint (floating, punctuator)
+
+
+The lexing of identifiers and keywords is a special case. 
+If we match keywords first, we might accidentally consider an identifier a keyword.
+E.g. lexing an identifier named whileValue. This would lex keyword(while), then an identifier(Value). This could also be an error.
+We could attempt to match a keyword, and check the next character isn't a letter.
+
+We could match identifiers first, and then check against a list of keywords. This would work but would cause us to process 
+keywords twice.
+
+A better system is to process keywords and identifiers simultaneously. Match against all letter characters, then check if this 
+is a keyword. If it isn't, it must be an identifier.
+
+
+
+Constraints
+===========
+
+We will now evaluate all constraints to find a correct order.
+
+Constraints:
+    floating, integer
+    character-based literals, word tokens
+    floating, punctuator
+
+
+There are minimal constraints, so a correct ordering is easily to reach.
+
+Final order:
+    char literals
+    string literals
+    numerical literals
+    punctuators
+    word tokens
+
+
+Notice both numerical literals and word based tokens have been squashed together, as this makes lexing easier.
