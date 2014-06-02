@@ -1,192 +1,34 @@
 package compiler.lexer;
 
+import compiler.lexer.token.Token;
+
 /**
- * Encapsulates the process of character/ string access to simplify the process of lexing.
+ * Class provides helper methods to lex certain language elements.
  * 
  * @author troy
  */
 public class LexerHelper {
-	
-	private StringBuffer input;
-	private int pos;
 
-	public LexerHelper(String text) {
-		input = new StringBuffer(text);
+	private Token lastLexedToken;
+	
+	public boolean tryLexNumericalLiteral() {
+		return false;
 	}
 	
-	public LexerHelper(StringBuffer buffer) {
-		input = buffer;
-	}
-	
-    /**
-     * Returns true if we can match the given string from the current position in the buffer.
-     *
-     * This implies the buffer has enough characters left, and the characters actually match.
-     *
-     * @param toMatch the string to match q
-     * @return true if there is a match
-     */
-    public boolean matches(String toMatch) {
-        int index = input.indexOf(toMatch, pos);
-
-        return index != -1 && index == pos;
-    }
-    
-    /**
-     * Consumes the given string.
-     * 
-     * If the string is not directly present, an error is thrown.
-     * 
-     * @param toConsume
-     */
-	public void consume(String toConsume) {
-		if (!matches(toConsume)) throw new Error("error consuming: " + toConsume);
-		
-		pos += toConsume.length();
-	}
-    
 	/**
-	 * Attempts to consume the given string, consuming if present.
-	 * If the string does not immediately match, this method does nothing.
-	 * 
-	 * @param toConsume
-	 * @return true if the string matched, false otherwise
+	 * Attempts to lex a
+	 * @return
 	 */
-	public boolean tryConsume(String toConsume) {
-		if (!matches(toConsume)) return false;
-		
-		consume(toConsume);
-		
-		return true;
+	public boolean tryLexNothing() {
+		return false;
 	}
 	
 	/**
-	 * Returns true if there is at least 1 more character remaining.
+	 * Returns the last lexed token.
 	 * 
 	 * @return
 	 */
-    public boolean hasChar() {
-    	return pos < input.length();
-    }
-    
-    /**
-     * Returns, but does not consume, the next character in the input.
-     * 
-     * @return
-     */
-    public char peekChar() {
-    	return input.charAt(pos);
-    }
-    
-    /**
-     * Returns true if the given number of characters are still left to be processed.
-     * 
-     * @param numChars
-     * @return
-     */
-	public boolean hasNumChars(int numChars) {
-		if (numChars < 1) throw new IllegalArgumentException("num chars must be 1 or greater");
-		
-		return (pos + numChars - 1) < input.length();
+	public Token getToken() {
+		return lastLexedToken;
 	}
-    
-	/**
-	 * Consumes the next character, returning it as well.
-	 * 
-	 * @return
-	 */
-    public char consumeChar() {
-    	return input.charAt(pos++);
-    }
-    
-    /**
-     * Skip over any whitespace at the current index position in the input string.
-     */
-    public void skipWhitespace() {
-        while (hasChar() && Character.isWhitespace(peekChar())) {
-            pos++;
-        }
-    }
-    
-    /**
-     * Consumes single characters until a match of the given string occurs, which 
-     * is also consumed.
-     * 
-     * Throws an error if the given string isn't present in the remainder of the buffer.
-     * 
-     * @param toMatch
-     */
-    public void consumeUntil(String toMatch) {
-    	while (hasChar()) {
-    		if (tryConsume(toMatch)) {
-    			return;
-    		} else {
-    			pos++;
-    		}
-    	}
-    	
-    	throw new Error("Attempt to consume until (" + toMatch + ") failed, EOF reached.");
-    }
-    
-    /**
-     * Attempts to consume until the given string is reached.
-     * 
-     * If the string is found, the position now points to the first char beyond the found string,
-     * or to the EOF if it happens to be reached.
-     * 
-     * If the string is not found, the position is put back to the beginning.
-     * 
-     * @param toMatch
-     */
-    public boolean tryConsumeUntil(String toMatch) {
-    	int positionBefore = pos;
-    	
-    	while (hasChar()) {
-    		if (tryConsume(toMatch)) {
-    			return true;
-    		}
-    		
-    		pos++;
-    	}
-    	
-    	pos = positionBefore;
-    	return false;
-    }
-    
-    /**
-     * Returns a substring of the buffer at the given indexes.
-     * 
-     * @param start
-     * @param end
-     * @return
-     */
-    public String substring(int start, int end) {
-    	return input.substring(start, end);
-    }
-    
-    /**
-     * Returns the character at the given index.
-     * 
-     * @param index
-     * @return
-     */
-    public char charAt(int index) {
-    	return input.charAt(index);
-    }
-    
-    /**
-     * Returns the current position into the buffer.
-     * 
-     * @return
-     */
-    public int getPosition() {
-    	return pos;
-    }
-    
-    /**
-     * Resets this LexerHelper, setting the internal position back to 0.
-     */
-    public void resetPosition() {
-    	pos = 0;
-    }
 }

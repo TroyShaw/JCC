@@ -1,6 +1,6 @@
 package compiler.lexer;
 
-public enum Operator {
+public enum Punctuator {
 	// braces/ brackets
 	LeftParenthesis("("),
 	RightParenthesis(")"),
@@ -60,7 +60,7 @@ public enum Operator {
 	
 	private String str;
 	
-	Operator(String str) {
+	Punctuator(String str) {
 		this.str = str;
 	}
 	

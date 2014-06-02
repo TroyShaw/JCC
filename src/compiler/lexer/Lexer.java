@@ -5,10 +5,12 @@ import java.util.List;
 
 import compiler.lexer.token.CharacterToken;
 import compiler.lexer.token.EscapeCharacter;
+import compiler.lexer.token.FloatingToken;
 import compiler.lexer.token.IdentifierToken;
+import compiler.lexer.token.IntegerToken;
 import compiler.lexer.token.KeywordToken;
 import compiler.lexer.token.LiteralToken;
-import compiler.lexer.token.OperatorToken;
+import compiler.lexer.token.PunctuatorToken;
 import compiler.lexer.token.StringToken;
 import compiler.lexer.token.Token;
 
@@ -20,10 +22,10 @@ import compiler.lexer.token.Token;
  */
 public class Lexer {
 	
-	private LexerHelper h;
+	private LexerBuffer h;
 	
 	public Lexer(String inputProgram) {
-		h = new LexerHelper(inputProgram);
+		h = new LexerBuffer(inputProgram);
 	}
 	
 	public List<Token> lex() {
@@ -131,11 +133,44 @@ public class Lexer {
     	throw syntaxError("unrecognised escape character");
 	}
 	
+	/**
+	 * Scans a numerical literal.
+	 * 
+	 * @return
+	 */
 	private LiteralToken scanNumericLiteral() {
 		
-		//TODO
-		return null;
+		String firstNum = scanNumeric();
+		
+        if (h.tryConsume(".")) {
+        	String secondNum = scanNumeric();
+        	
+            return new FloatingToken(firstNum + "." + secondNum);
+        } else {
+        	return new IntegerToken(firstNum);
+        }
 	}
+	
+    /**
+     * Scans from the current character until the last that isn't a number.
+     * These characters are concatenated and returned.
+     * 
+     * The lexer-helpers internal offset is moved by calling this function.
+     * 
+     * If no number can be made, an exception is thrown.
+     * 
+     * @return
+     */
+    private String scanNumeric() {
+    	if (!h.hasChar()) throw syntaxError("Reached EOF while parsing numeric value");
+    	if (!Character.isDigit(h.peekChar())) throw syntaxError("Non-numeric character found instead of digit");
+    		
+    	StringBuffer buffer = new StringBuffer();
+    	
+    	while (Character.isDigit(h.peekChar())) buffer.append(h.consumeChar());
+    		
+    	return buffer.toString();
+    }
 	
 	/**
 	 * Scans a c integer constant.
@@ -157,7 +192,7 @@ public class Lexer {
 	private LiteralToken scanFloatingConstant() {
 		return null;
 	}
-	
+
 	private Token scanWord() {
 		//first try keywords
 		
@@ -187,21 +222,49 @@ public class Lexer {
 	}
 	
 	private boolean matchesOperator() {
-		for (Operator o : Operator.values()) {
+		for (Punctuator o : Punctuator.values()) {
 			if (h.matches(o.getString())) return true;
 		}
 		
 		return false;
 	}
 	
-	private OperatorToken scanOperator() {
-		for (Operator o : Operator.values()) {
+	private PunctuatorToken scanOperator() {
+		for (Punctuator o : Punctuator.values()) {
 			if (h.matches(o.getString())) {
-				return new OperatorToken(o);
+				return new PunctuatorToken(o);
 			}
 		}
 		
 		throw syntaxError("Unknown operator");
+	}
+	
+	/**
+	 * Scans and returns the next hex string.
+	 * @return
+	 */
+	private String scanHexString() {
+		String ox;
+		
+		if (h.tryConsume("0x")) ox = "0x";
+		else if (h.tryConsume("0X")) ox = "0x";
+		else throw syntaxError("invalid hex string");
+		
+		//now scan digits
+		char c = h.peekChar();
+		
+		if (!isHexDigit(c)) {
+			throw syntaxError("incomplete hex string");
+		}
+		
+		while (h.hasChar()) {
+			ox += c;
+			
+			c = h.consumeChar();
+		}
+		
+		
+		throw syntaxError("Reached EOF while parsing hex");
 	}
 	
 	private boolean isDigit(char c) {
@@ -210,6 +273,10 @@ public class Lexer {
 	
 	private boolean isIdentifierStart(char c) {
 		return c == '_' || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+	}
+	
+	private boolean isHexDigit(char c) {
+		return isDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
 	}
 	
 	private boolean isIdentifierRest(char c) {

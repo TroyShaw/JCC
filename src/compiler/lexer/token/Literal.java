@@ -2,7 +2,7 @@ package compiler.lexer.token;
 
 public enum Literal {
 	Integer,
-	Real,
+	Floating,
 	Character,
 	String;	
 }
