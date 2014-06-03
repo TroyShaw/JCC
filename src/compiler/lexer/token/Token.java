@@ -7,4 +7,18 @@ package compiler.lexer.token;
  */
 public abstract class Token {
 
+	private String string;
+	
+	public Token() {
+		//TODO: remove this?
+	}
+	
+	public Token(String string) {
+		this.string = string;
+	}
+	
+	@Override
+	public String toString() {
+		return "{Token. Type: " + getClass() + ", value: " + string + " }";
+	}
 }

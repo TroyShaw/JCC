@@ -45,4 +45,12 @@ public class BasicLexingTests {
 		Assert.assertTrue(true);
 	}
 
+	@Test
+	public void lexTest2() {
+		String source = IOUtils.readFile("src/testing/code/lexer/basic_lex_1.c");
+		
+		Lexer l = new Lexer(source);
+		
+		List<Token> tokens = l.lex();
+	}
 }

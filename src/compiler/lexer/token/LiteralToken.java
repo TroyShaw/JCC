@@ -1,6 +1,11 @@
 package compiler.lexer.token;
 
-public class LiteralToken extends Token {
+/**
+ * Class defines an abstract base for the different literal tokens in a C99 program.
+ * 
+ * @author troy
+ */
+public abstract class LiteralToken extends Token {
 
 	private Literal type;
 	private String stringValue;

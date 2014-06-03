@@ -57,7 +57,7 @@ public class LexerHelper {
 			buffer.append(c);
 		}
 		
-		return false;
+		throw syntaxError("Reached EOF while parsing string literal");
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public class LexerHelper {
 			buffer.append(c);
 		}
 		
-		return false;
+		throw syntaxError("Reached EOF while parsing char literal");
 	}
 	
 	/**
