@@ -118,7 +118,20 @@ sign: +, -
 Explanation
 -----------
 
+The floating constant is reasonably complex.
 
+
+There are two main cases: base 10 floating constants, and hex floating constants.
+First, all constants can have an optional floating-suffix.
+
+For base 10, there are two main cases
+
+fractional-constant [exponent-part]
+    [digit-sequence] . digit-sequence [exponent-part]
+    digit-sequence . [exponent-part]
+
+digit-sequence exponent-part
+    
 
 char constant
 =============

@@ -95,6 +95,17 @@ public class LexerBuffer {
     }
     
     /**
+     * Moves the buffer back 1 character. Only valid if our current position is not the start.
+     */
+    public void rewind() {
+    	if (pos == 0) {
+    		throw new IllegalStateException("Attempting to rewind past the start of the buffer");
+    	}
+    	
+    	pos--;
+    }
+    
+    /**
      * Returns true if the given number of characters are still left to be processed.
      * 
      * @param numChars

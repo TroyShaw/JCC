@@ -91,6 +91,15 @@ public class LexerHelper {
 	 * @return
 	 */
 	public boolean tryLexNumericalLiteral() {
+		if (!isNumericalStart()) return false;
+		
+		// Floating point constants always start with the form
+		// [digit-sequence] . [digit sequence]     or
+		// digit-sequence . [digit sequence]
+		// So we can tell a floating point if we have either a decimal, or a 
+		// decimal after a single dot
+		
+		
 		return false;
 	}
 	
@@ -261,6 +270,29 @@ public class LexerHelper {
 		
 		
 		throw syntaxError("Reached EOF while parsing hex");
+	}
+	
+	/**
+	 * Returns true if the current buffer is the start of a numerical constant.
+	 * 
+	 * @return
+	 */
+	private boolean isNumericalStart() {
+		// A numerical value either starts with a digit, or a dot followed by a digit
+		char c = b.peekChar();
+		
+		if (isDigit(c)) return true;
+		
+		if (c == '.') {
+			// Check the next digit is numerical. Be sure the preserve the buffer state.
+			b.consumeChar();
+			c = b.peekChar();
+			b.rewind();
+			
+			return isDigit(c);
+		} else {
+			return false;
+		}
 	}
 	
 	private boolean isDigit(char c) {
