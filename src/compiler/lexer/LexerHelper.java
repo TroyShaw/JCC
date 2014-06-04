@@ -54,7 +54,7 @@ public class LexerHelper {
 		StringBuffer buffer = new StringBuffer();
 		
 		while (b.hasChar()) {
-			char c = scanChar();
+			char c = scanSimpleChar();
 			
 			if (c == '"') return setToken(new StringToken(buffer.toString(), isWide));
 			
@@ -79,7 +79,7 @@ public class LexerHelper {
 		StringBuffer buffer = new StringBuffer();
 		
 		while (b.hasChar()) {
-			char c = scanChar();
+			char c = scanSimpleChar();
 			
 			if (c == '\'') return setToken(new CharacterToken(buffer.toString(), isWide));
 			
@@ -174,7 +174,7 @@ public class LexerHelper {
      * 
      * @return
      */
-	private char scanChar() {
+	private char scanSimpleChar() {
 		char c = b.consumeChar();
     	
     	if (c != '\\') return c;
@@ -187,8 +187,6 @@ public class LexerHelper {
     			return esChar.getEscapedChar();
     		}
     	}
-    	
-    	//TODO: unicode, octal, hex constants, etc
     	
     	throw syntaxError("unrecognised escape character");
 	}

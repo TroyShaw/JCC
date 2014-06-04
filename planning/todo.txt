@@ -6,10 +6,11 @@ Key
 
 x - task name
 o - task name
+* - task name
 
-x - denotes the task is yet to be completed
+* - denotes the task is yet to be started
 o - denotes the task has been completed
-
+x - denotes the task is in the process of being finished
 
 Preprocessing
 =============
@@ -21,26 +22,30 @@ x - main preprocessing directives (to outline later)
 Lexing
 ======
 
-o - token OO representation
+* - token OO representation
+        still need to represent all the different language elements (constant modifiers, etc)
 
-o - operators/ syntactical tokens
-o - Keywords
-o - Identifiers
+o - punctuators tokens
 
-x - numerical literals
-    x - octal
-    x - hexidecimal
-    x - integer
+o - Keywords, Identifiers
+
+* - numerical literals
+    * - integer
+    * - floating
+        * - octal
+        * - hexidecimal
+        * - integer
 
 o - string literal
-o - char literals
 
-x - all escape sequences supported (\n, \t, \b, etc)
+x - char literals
+        still need to support hex/ numerical values inside chars
+        still need to support unicode
 
-x - unicode? (not sure if this is part of the standard or not)
+o - all escape sequences supported (\n, \t, \b, etc)
 
-x - write tests
-x - tidy up code, refactor, document
+* - write tests
+* - tidy up code, refactor, document
 
 Parsing
 =======
