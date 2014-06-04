@@ -21,4 +21,18 @@ public abstract class Token {
 	public String toString() {
 		return "{Token. Type: " + getClass() + ", value: " + string + " }";
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Token) {
+			Token t = (Token) o;
+			
+			boolean sameClass = o.getClass().equals(getClass());
+			boolean sameValue = t.string.equals(string);
+			
+			return sameClass && sameValue;
+		}
+		
+		return false;
+	}
 }

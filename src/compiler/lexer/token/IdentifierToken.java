@@ -9,6 +9,6 @@ public class IdentifierToken extends Token {
 
 
 	public IdentifierToken(String identifier) {
-		
+		super(identifier);
 	}
 }

@@ -36,7 +36,9 @@ public class Lexer {
 				continue;
 			}
 
-			tokens.add(scanSingleToken());
+			Token t = scanSingleToken();
+			
+			tokens.add(t);
 		}
 
 		return tokens;

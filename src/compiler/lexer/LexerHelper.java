@@ -14,6 +14,10 @@ import compiler.lexer.token.Token;
 /**
  * Class provides helper methods to lex certain language elements.
  * 
+ * To use this class, call one of the tryLex*() methods.
+ * The method will attempt to lex the given token, returning true if it succeeds.
+ * If a lex occurs, one should then call getToken() to access this saved lexed token.
+ * 
  * @author troy
  */
 public class LexerHelper {
@@ -132,7 +136,7 @@ public class LexerHelper {
 	 */
 	public boolean tryLexPunctuator() {
 		for (Punctuator o : Punctuator.values()) {
-			if (b.matches(o.getString())) {
+			if (b.tryConsume(o.getString())) {
 				return setToken(new PunctuatorToken(o));
 			}
 		}
@@ -273,6 +277,32 @@ public class LexerHelper {
 	}
 	
 	/**
+	 * Scans a single integer numerical string.
+	 * This assumes there is a numerical string ready to scan.
+	 * 
+	 * @return
+	 */
+	private String scanNumericString() {
+		StringBuffer numericalValue = new StringBuffer();
+
+		while (isDigit(b.peekChar())) {
+			numericalValue.append(b.consumeChar());
+		}
+		
+		return numericalValue.toString();
+	}
+	
+	private String scanOctalString() {
+		StringBuffer numericalValue = new StringBuffer();
+
+		while (isOctalDigit((b.peekChar()))) {
+			numericalValue.append(b.consumeChar());
+		}
+		
+		return numericalValue.toString();
+	}
+	
+	/**
 	 * Returns true if the current buffer is the start of a numerical constant.
 	 * 
 	 * @return
@@ -295,16 +325,21 @@ public class LexerHelper {
 		}
 	}
 	
-	private boolean isDigit(char c) {
-		return '0' <= c && c <= '9';
-	}
-	
+
 	private boolean isIdentifierStart(char c) {
 		return c == '_' || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 	}
 	
+	private boolean isDigit(char c) {
+		return '0' <= c && c <= '9';
+	}
+	
 	private boolean isHexDigit(char c) {
 		return isDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
+	}
+	
+	private boolean isOctalDigit(char c) {
+		return '0' <= c && c <= '7';
 	}
 	
 	private boolean isIdentifierRest(char c) {

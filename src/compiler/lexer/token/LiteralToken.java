@@ -11,6 +11,8 @@ public abstract class LiteralToken extends Token {
 	private String stringValue;
 	
 	public LiteralToken(String stringValue, Literal type) {
+		super(stringValue);
+		
 		this.type = type;
 		this.stringValue = stringValue;
 	}

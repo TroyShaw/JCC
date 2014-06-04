@@ -23,8 +23,8 @@ import compiler.lexer.token.Token;
 public class BasicLexingTests {
 
 	@Test
-	public void test() {
-		String source = IOUtils.readFile("basic_lex_1.c");
+	public void lexTest1() {
+		String source = IOUtils.readFile("src/testing/code/lexer/basic_lex_1.c");
 		
 		Lexer l = new Lexer(source);
 		
@@ -41,16 +41,6 @@ public class BasicLexingTests {
 		expected.add(new PunctuatorToken(Punctuator.SemiColon));
 		expected.add(new PunctuatorToken(Punctuator.RightCurlyBracket));
 		
-		
-		Assert.assertTrue(true);
-	}
-
-	@Test
-	public void lexTest2() {
-		String source = IOUtils.readFile("src/testing/code/lexer/basic_lex_1.c");
-		
-		Lexer l = new Lexer(source);
-		
-		List<Token> tokens = l.lex();
+		Assert.assertTrue(expected.equals(tokens));
 	}
 }
