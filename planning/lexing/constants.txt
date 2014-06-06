@@ -173,6 +173,19 @@ hexadecimal-escape-sequence:
 Description
 -----------
 
+A char constant is 1 or more c-chars enclosed in single-quote marks. 
+A c-char can be of a few forms:
+    - a simple single char, e.g. a, 4, s, etc.
+    - an escaped value, e.g. \n, \t, \a, etc.
+    - an octal escape value, which is a backslash followed by 1, 2 or 3 octal digits, e.g. \073, \0, \23, etc.
+    - a hexadecimal escape value, which is \x, followed by 1 or more hex digits, e.g. \x28a09Ef, \xabab, \x0, etc.
+    - a universal character name, which is \u or \U followed by 4 or 8 hex digits, e.g. \u0AAe, \UDee329AF
+
+There is also a restriction that a c-char cannot be a single-quote ', a newline, or the backslash.
+
+An interesting consequence of this is that the null char '\0' is actually an octal char constant!
+Note also char constants can be prefixed with a capital 'L' character to denote it as a wide char constant.
+
 string constant
 ===============
 
@@ -187,3 +200,8 @@ s-char-sequence:
 s-char:
     | any character except ", \, or newline
     | escape-sequence
+
+A string constant has exactly the same syntax, grammar, etc of a c-char, except with a few changes.
+A string constant can be empty, e.g. "", whereas a char constant requires at least one character.
+
+Instead of the restriction being single-quotes, it is now double-quotes.

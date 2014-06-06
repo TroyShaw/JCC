@@ -301,6 +301,15 @@ public class LexerHelper {
 	}
 	
 	/**
+	 * Scans a single universal character name.
+	 * 
+	 * @return
+	 */
+	private String scanUniversalCharacterName() {
+		return null;
+	}
+	
+	/**
 	 * Returns true if the current buffer is the start of a numerical constant.
 	 * 
 	 * @return
