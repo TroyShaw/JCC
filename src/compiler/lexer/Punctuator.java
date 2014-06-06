@@ -21,6 +21,7 @@ public enum Punctuator {
 	Plus("+"),
 	Minus("-"),
 	Asterisk("*"),
+	Ampersand("&"),
 	Slash("/"),
 	Percent("%"),
 	

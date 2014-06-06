@@ -30,6 +30,16 @@ public class Lexer {
 		List<Token> tokens = new ArrayList<Token>();
 
 		while (b.hasChar()) {
+            if (b.tryConsume("//")) {
+                b.consumeUntil("\n");
+                continue;
+            }
+            
+            if (b.tryConsume("/*")) {
+                if (!b.tryConsumeUntil("*/")) syntaxError("Unfinished multiline comment");
+                continue;
+            }
+			
 			// TODO this is Java's definition of whitespace, need to use C's
 			if (Character.isWhitespace(b.peekChar())) {
 				b.skipWhitespace();
@@ -37,7 +47,7 @@ public class Lexer {
 			}
 
 			Token t = scanSingleToken();
-			
+
 			tokens.add(t);
 		}
 
@@ -56,7 +66,7 @@ public class Lexer {
 		if (h.tryLexPunctuator())       return h.getToken();
 		if (h.tryLexIdenOrKeyword())    return h.getToken();
 
-		throw syntaxError("Unknown token encountered");
+		throw syntaxError("Unknown character encountered: " + b.peekChar());
 	}
 
 	private RuntimeException syntaxError(String error) {

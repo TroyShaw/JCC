@@ -48,6 +48,10 @@ public class LexerBuffer {
     	return false;
     }
     
+    public boolean matches(CharType type) {
+    	return hasChar() && type.matches(peekChar());
+    }
+    
     /**
      * Consumes the given string.
      * 
@@ -74,6 +78,20 @@ public class LexerBuffer {
 		consume(toConsume);
 		
 		return true;
+	}
+	
+	/**
+	 * Retrieves all characters in the buffer that match the given CharType 
+	 * until a character is present that does not match, or the buffer is empty.
+	 */
+	public String nextMatching(CharType type) {
+		StringBuffer buffer = new StringBuffer();
+		
+		while (type.matches(peekChar())) {
+			buffer.append(consumeChar());
+		}
+		
+		return buffer.toString();
 	}
 	
 	/**

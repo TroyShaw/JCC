@@ -43,4 +43,15 @@ public class BasicLexingTests {
 		
 		Assert.assertTrue(expected.equals(tokens));
 	}
+	
+	@Test
+	public void lexTest2() {
+		String source = IOUtils.readFile("src/testing/code/lexer/complex_lex_1.c");
+		
+		Lexer l = new Lexer(source);
+		
+		List<Token> tokens = l.lex();
+		
+		for (Token t : tokens) System.out.println(t);
+	}
 }

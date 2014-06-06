@@ -103,8 +103,17 @@ public class LexerHelper {
 		// So we can tell a floating point if we have either a decimal, or a 
 		// decimal after a single dot
 		
+		String lhs = scanDecimalNumber();
 		
-		return false;
+		if (b.tryConsume(".")) {
+			//a floating point value
+			String rhs = scanDecimalNumber();
+			
+			return setToken(new FloatingToken(lhs + "." + rhs));
+		} else {
+			//was a simple integer
+			return setToken(new IntegerToken(lhs));
+		}
 	}
 	
 	/**
@@ -113,7 +122,7 @@ public class LexerHelper {
 	 * @return
 	 */
 	public boolean tryLexIdenOrKeyword() {
-		if (!isIdentifierStart(b.peekChar())) return false;
+		if (!b.matches(CharType.IdentifierStart)) return false;
 		
 		String word = matchIdentifier();
 		
@@ -127,7 +136,6 @@ public class LexerHelper {
 		//Otherwise it must be an identifier
 		return setToken(new IdentifierToken(word));
 	}
-	
 	
 	/**
 	 * Tries to lex a punctuator, returning true if it succeeds.
@@ -154,13 +162,7 @@ public class LexerHelper {
 	 * @return
 	 */
 	private String matchIdentifier() {
-		StringBuffer identifierBuffer = new StringBuffer();
-		
-		while (isIdentifierRest(b.peekChar())) {
-			identifierBuffer.append(b.consumeChar());
-		}
-		
-		return identifierBuffer.toString();
+		return b.nextMatching(CharType.IdentifierRest);
 	}
 	
 	 /**
@@ -260,44 +262,23 @@ public class LexerHelper {
 		//now scan digits
 		char c = b.peekChar();
 		
-		if (!isHexDigit(c)) {
+		if (!CharType.Hex.matches(c)) {
 			throw syntaxError("incomplete hex string");
 		}
 		
-		while (b.hasChar()) {
-			ox += c;
-			
-			c = b.consumeChar();
-		}
-		
-		
-		throw syntaxError("Reached EOF while parsing hex");
+		return ox + scanHexNumber();
+	}
+
+	private String scanDecimalNumber() {
+		return b.nextMatching(CharType.Decimal);
 	}
 	
-	/**
-	 * Scans a single integer numerical string.
-	 * This assumes there is a numerical string ready to scan.
-	 * 
-	 * @return
-	 */
-	private String scanNumericString() {
-		StringBuffer numericalValue = new StringBuffer();
-
-		while (isDigit(b.peekChar())) {
-			numericalValue.append(b.consumeChar());
-		}
-		
-		return numericalValue.toString();
+	private String scanOctalNumber() {
+		return b.nextMatching(CharType.Octal);
 	}
 	
-	private String scanOctalString() {
-		StringBuffer numericalValue = new StringBuffer();
-
-		while (isOctalDigit((b.peekChar()))) {
-			numericalValue.append(b.consumeChar());
-		}
-		
-		return numericalValue.toString();
+	private String scanHexNumber() {
+		return b.nextMatching(CharType.Hex);
 	}
 	
 	/**
@@ -320,7 +301,7 @@ public class LexerHelper {
 		for (int i = 0; i < 4; i++) {
 			c = b.peekChar();
 			
-			if (!isHexDigit(c)) {
+			if (!CharType.Hex.matches(c)) {
 				throw syntaxError("UCN requires at least 4 hex digits");
 			}
 			
@@ -342,41 +323,18 @@ public class LexerHelper {
 	 */
 	private boolean isNumericalStart() {
 		// A numerical value either starts with a digit, or a dot followed by a digit
-		char c = b.peekChar();
+		if (b.matches(CharType.Decimal)) return true;
 		
-		if (isDigit(c)) return true;
-		
-		if (c == '.') {
+		if (b.peekChar() == '.') {
 			// Check the next digit is numerical. Be sure the preserve the buffer state.
 			b.consumeChar();
-			c = b.peekChar();
+			char c = b.peekChar();
 			b.rewind();
 			
-			return isDigit(c);
+			return CharType.Decimal.matches(c);
 		} else {
 			return false;
 		}
-	}
-	
-
-	private boolean isIdentifierStart(char c) {
-		return c == '_' || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
-	}
-	
-	private boolean isDigit(char c) {
-		return '0' <= c && c <= '9';
-	}
-	
-	private boolean isHexDigit(char c) {
-		return isDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
-	}
-	
-	private boolean isOctalDigit(char c) {
-		return '0' <= c && c <= '7';
-	}
-	
-	private boolean isIdentifierRest(char c) {
-		return isIdentifierStart(c) || isDigit(c);
 	}
 	
 	/**
