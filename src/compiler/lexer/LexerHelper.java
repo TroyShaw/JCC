@@ -303,9 +303,35 @@ public class LexerHelper {
 	/**
 	 * Scans a single universal character name.
 	 * 
+	 * This assumes a valid UCN is currently present in the buffer.
+	 * 
 	 * @return
 	 */
 	private String scanUniversalCharacterName() {
+		String ox;
+		
+		if (b.tryConsume("\\u")) ox = "\\u";
+		else if (b.tryConsume("\\u")) ox = "\\u";
+		else throw syntaxError("invalid UCN string");
+		
+		char c;
+		
+		//first match the guaranteed 4
+		for (int i = 0; i < 4; i++) {
+			c = b.peekChar();
+			
+			if (!isHexDigit(c)) {
+				throw syntaxError("UCN requires at least 4 hex digits");
+			}
+			
+			ox += b.consumeChar();
+		}
+		
+		//now we must try match 4. If a non-hex is found, we must revert our scan
+		for (int i = 0; i < 4; i++) {
+			
+		}
+		
 		return null;
 	}
 	

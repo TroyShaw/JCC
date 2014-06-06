@@ -60,7 +60,7 @@ public class LexerBuffer {
 		
 		pos += toConsume.length();
 	}
-    
+	
 	/**
 	 * Attempts to consume the given string, consuming if present.
 	 * If the string does not immediately match, this method does nothing.
