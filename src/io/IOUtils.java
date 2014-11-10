@@ -13,12 +13,12 @@ public class IOUtils {
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
 			
-	        StringBuffer text = new StringBuffer();
-	        String tmp;
-	        while ((tmp = in.readLine()) != null) {
-	            text.append(tmp);
-	            text.append("\n");
-	        }
+			StringBuffer text = new StringBuffer();
+			String tmp;
+			while ((tmp = in.readLine()) != null) {
+				text.append(tmp);
+				text.append("\n");
+			}
 			
 			
 			in.close();

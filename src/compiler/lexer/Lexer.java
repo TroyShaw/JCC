@@ -30,15 +30,15 @@ public class Lexer {
 		List<Token> tokens = new ArrayList<Token>();
 
 		while (b.hasChar()) {
-            if (b.tryConsume("//")) {
-                b.consumeUntil("\n");
-                continue;
-            }
-            
-            if (b.tryConsume("/*")) {
-                if (!b.tryConsumeUntil("*/")) syntaxError("Unfinished multiline comment");
-                continue;
-            }
+			if (b.tryConsume("//")) {
+				b.consumeUntil("\n");
+				continue;
+			}
+			
+			if (b.tryConsume("/*")) {
+				if (!b.tryConsumeUntil("*/")) syntaxError("Unfinished multiline comment");
+				continue;
+			}
 			
 			// TODO this is Java's definition of whitespace, need to use C's
 			if (Character.isWhitespace(b.peekChar())) {

@@ -166,31 +166,31 @@ public class LexerHelper {
 	}
 	
 	 /**
-     * Scans the next char in the input, consuming and returning it.
-     * 
-     * Note: this isn't for scanning a char representation in source code, e.g. 'a'
-     * This simply scans a single char and returns it, e.g. a
-     * 
-     * Handles escape characters properly, consuming 2 chars for an escaped char.
-     * If EOF is reached, a syntax error is thrown.
-     * 
-     * @return
-     */
+	 * Scans the next char in the input, consuming and returning it.
+	 * 
+	 * Note: this isn't for scanning a char representation in source code, e.g. 'a'
+	 * This simply scans a single char and returns it, e.g. a
+	 * 
+	 * Handles escape characters properly, consuming 2 chars for an escaped char.
+	 * If EOF is reached, a syntax error is thrown.
+	 * 
+	 * @return
+	 */
 	private char scanSimpleChar() {
 		char c = b.consumeChar();
-    	
-    	if (c != '\\') return c;
-    	
-    	//we've got an escaped char
-    	c = b.consumeChar();
-    	
-    	for (EscapeCharacter esChar : EscapeCharacter.values()) {
-    		if (c == esChar.getCharValue()) {
-    			return esChar.getEscapedChar();
-    		}
-    	}
-    	
-    	throw syntaxError("unrecognised escape character");
+		
+		if (c != '\\') return c;
+		
+		//we've got an escaped char
+		c = b.consumeChar();
+		
+		for (EscapeCharacter esChar : EscapeCharacter.values()) {
+			if (c == esChar.getCharValue()) {
+				return esChar.getEscapedChar();
+			}
+		}
+		
+		throw syntaxError("unrecognised escape character");
 	}
 	
 	/**
@@ -201,35 +201,35 @@ public class LexerHelper {
 	private LiteralToken scanNumericLiteral() {
 		String firstNum = scanNumeric();
 		
-        if (b.tryConsume(".")) {
-        	String secondNum = scanNumeric();
-        	
-            return new FloatingToken(firstNum + "." + secondNum);
-        } else {
-        	return new IntegerToken(firstNum);
-        }
+		if (b.tryConsume(".")) {
+			String secondNum = scanNumeric();
+			
+			return new FloatingToken(firstNum + "." + secondNum);
+		} else {
+			return new IntegerToken(firstNum);
+		}
 	}
 	
-    /**
-     * Scans from the current character until the last that isn't a number.
-     * These characters are concatenated and returned.
-     * 
-     * The lexer-helpers internal offset is moved by calling this function.
-     * 
-     * If no number can be made, an exception is thrown.
-     * 
-     * @return
-     */
-    private String scanNumeric() {
-    	if (!b.hasChar()) throw syntaxError("Reached EOF while parsing numeric value");
-    	if (!Character.isDigit(b.peekChar())) throw syntaxError("Non-numeric character found instead of digit");
-    		
-    	StringBuffer buffer = new StringBuffer();
-    	
-    	while (Character.isDigit(b.peekChar())) buffer.append(b.consumeChar());
-    		
-    	return buffer.toString();
-    }
+	/**
+	 * Scans from the current character until the last that isn't a number.
+	 * These characters are concatenated and returned.
+	 * 
+	 * The lexer-helpers internal offset is moved by calling this function.
+	 * 
+	 * If no number can be made, an exception is thrown.
+	 * 
+	 * @return
+	 */
+	private String scanNumeric() {
+		if (!b.hasChar()) throw syntaxError("Reached EOF while parsing numeric value");
+		if (!Character.isDigit(b.peekChar())) throw syntaxError("Non-numeric character found instead of digit");
+			
+		StringBuffer buffer = new StringBuffer();
+		
+		while (Character.isDigit(b.peekChar())) buffer.append(b.consumeChar());
+			
+		return buffer.toString();
+	}
 	
 	/**
 	 * Scans a c integer constant.

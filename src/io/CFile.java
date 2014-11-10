@@ -26,7 +26,7 @@ public class CFile {
 	}
 	
 	private void readFile() throws FileNotFoundException {		
-        BufferedReader in = null;
+		BufferedReader in = null;
 		try {
 			in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
 		} catch (UnsupportedEncodingException e) {
@@ -36,26 +36,26 @@ public class CFile {
 			throw e;
 		}
 
-        StringBuffer text = new StringBuffer();
-        String tmp;
-        
-        try {
+		StringBuffer text = new StringBuffer();
+		String tmp;
+		
+		try {
 			while ((tmp = in.readLine()) != null) {
-			    text.append(tmp);
-			    text.append("\n");
+				text.append(tmp);
+				text.append("\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
-        
-        try {
+		
+		try {
 			in.close();
 		} catch (IOException e) {
 			//can't really do anything here
 		}
 
-        rawContents = text;
+		rawContents = text;
 	}
 	
 	public String getFileName() {
