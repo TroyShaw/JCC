@@ -45,22 +45,22 @@ public class LexerHelper {
 	 * @return
 	 */
 	public boolean tryLexStringLiteral() {
-		if (!b.matches("\"", "L'")) return false;
-		
+		if (!b.matches("\"", "L\"")) return false;
+
 		boolean isWide = b.tryConsume("L");
 		
 		b.consume("\"");
-		
+
 		StringBuffer buffer = new StringBuffer();
-		
+
 		while (b.hasChar()) {
 			char c = scanSimpleChar();
-			
+
 			if (c == '"') return setToken(new StringToken(buffer.toString(), isWide));
-			
+
 			buffer.append(c);
 		}
-		
+
 		throw syntaxError("Reached EOF while parsing string literal");
 	}
 	

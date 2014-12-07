@@ -18,7 +18,7 @@ Grammar
 
 integer-constant:
     | decimal-constant integer-suffix(opt)
-    | octal-constant intgger-suffix(opt)
+    | octal-constant integer-suffix(opt)
     | hexadecimal-constant integer_suffix(opt)
 
 decimal-constant:
