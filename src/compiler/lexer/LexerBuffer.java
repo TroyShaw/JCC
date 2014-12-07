@@ -148,7 +148,7 @@ public class LexerBuffer {
 	 * Skip over any whitespace at the current index position in the input string.
 	 */
 	public void skipWhitespace() {
-		while (hasChar() && Character.isWhitespace(peekChar())) {
+		while (hasChar() && matches(CharType.WhiteSpace)) {
 			pos++;
 		}
 	}

@@ -17,15 +17,15 @@ public enum EscapeCharacter {
 	Backslash     ("\\", '\\', (char) 0x5C),
 	SingleQuote   ("\'", '\'', (char) 0x27),
 	DoubleQuote   ("\"", '\"', (char) 0x22);
-	
+
 	private String text;
 	private char charVal;
 	private char escapedChar;
-	
-	EscapeCharacter(String text, char charVal, char escapedChar) {
+
+	EscapeCharacter(String text, char escapedChar, char charVal) {
 		this.text = text;
-		this.charVal = charVal;
 		this.escapedChar = escapedChar;
+		this.charVal = charVal;
 	}
 
 	/**
@@ -43,17 +43,17 @@ public enum EscapeCharacter {
 	 * 
 	 * @return
 	 */
-	public char getCharValue() {
-		return charVal;
+	public char getEscapedChar() {
+		return escapedChar;
 	}
+	
 	
 	/**
 	 * Returns the actual char code of the escape value.
 	 * e.g. Newline returns 0x0A, etc.
-	 * 
 	 * @return
 	 */
-	public char getEscapedChar() {
-		return escapedChar;
+	public char getCharValue() {
+		return charVal;
 	}
 }

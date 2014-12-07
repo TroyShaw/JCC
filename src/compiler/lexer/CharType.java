@@ -1,5 +1,7 @@
 package compiler.lexer;
 
+import compiler.lexer.token.EscapeCharacter;
+
 /**
  * Enum contains the different character types, and methods relating to checking
  * for that given type.
@@ -7,6 +9,9 @@ package compiler.lexer;
  * @author troy
  */
 public enum CharType {
+	/**
+	 * A decimal is defined as any character between 0-9.
+	 */
 	Decimal {
 		@Override
 		public boolean matches(char c) {
@@ -14,6 +19,9 @@ public enum CharType {
 		}
 	},
 	
+	/**
+	 * An octal is defined as any character between 0-7.
+	 */
 	Octal {
 		@Override
 		public boolean matches(char c) {
@@ -21,6 +29,9 @@ public enum CharType {
 		}
 	},
 	
+	/**
+	 * A hex is defined as any decimal character, as well as characters a-F and A-F.
+	 */
 	Hex {
 		@Override
 		public boolean matches(char c) {
@@ -28,6 +39,10 @@ public enum CharType {
 		}
 	},
 	
+	/**
+	 * An identifier start (the first character of an identifier) is defined as
+	 * any of the underscore (_), a-z and A-Z.
+	 */
 	IdentifierStart {
 		@Override
 		public boolean matches(char c) {
@@ -35,10 +50,33 @@ public enum CharType {
 		}
 	},
 	
+	/**
+	 * An identifier rest (the characters after the first of an identifier) is
+	 * defined as any identifier start character, as well as any decimal.
+	 */
 	IdentifierRest {
 		@Override
 		public boolean matches(char c) {
 			return IdentifierStart.matches(c) || Decimal.matches(c);
+		}
+	},
+	
+	/**
+	 * Whitespace is defined as:
+	 *  - space character
+	 *  - newline character
+	 *  - form-feed character
+	 *  - horizontal-tab character 
+	 *  - vertical-tab character
+	 */
+	WhiteSpace {
+		@Override
+		public boolean matches(char c) {
+			// Have to special-case vertical-tab since Java doesn't have
+			// an escape sequence for it.
+			char vertChar = EscapeCharacter.VerticalTab.getCharValue();
+			
+			return c == ' ' || c == '\n' || c == '\f' || c == '\t' || c == vertChar;
 		}
 	};
 	
@@ -49,5 +87,4 @@ public enum CharType {
 	 * @return
 	 */
 	public abstract boolean matches(char c);
-
 }
