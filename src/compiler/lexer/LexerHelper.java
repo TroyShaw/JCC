@@ -143,7 +143,7 @@ public class LexerHelper {
 	 * @return
 	 */
 	public boolean tryLexPunctuator() {
-		for (Punctuator o : Punctuator.values()) {
+		for (Punctuator o : Punctuator.getSortedPunctuators()) {
 			if (b.tryConsume(o.getString())) {
 				return setToken(new PunctuatorToken(o));
 			}

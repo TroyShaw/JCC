@@ -87,7 +87,7 @@ public class LexerBuffer {
 	public String nextMatching(CharType type) {
 		StringBuffer buffer = new StringBuffer();
 		
-		while (type.matches(peekChar())) {
+		while (hasChar() && type.matches(peekChar())) {
 			buffer.append(consumeChar());
 		}
 		

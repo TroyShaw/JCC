@@ -1,5 +1,7 @@
 package compiler.lexer;
 
+import java.util.*;
+
 public enum Punctuator {
 	// braces/ brackets
 	LeftParenthesis("("),
@@ -31,10 +33,10 @@ public enum Punctuator {
 	EqualEqual("=="),
 	NotEqual("!="),
 	
-	GreaterThan("<"),
-	GreaterThanEq("<="),
-	LessThan(">"),
-	LessThanEq(">="),
+	GreaterThan(">"),
+	GreaterThanEq(">="),
+	LessThan("<"),
+	LessThanEq("<="),
 	
 	LogicalNot("!"),
 	LogicalAnd("&&"),
@@ -68,4 +70,26 @@ public enum Punctuator {
 	public String getString() {
 		return str;
 	}
+
+    private static List<Punctuator> sortedTokens;
+
+    public static List<Punctuator> getSortedPunctuators() {
+        if (sortedTokens != null) return sortedTokens;
+
+        sortedTokens = Arrays.asList(Punctuator.values());
+        Collections.sort(sortedTokens, TokenLengthComparator.Instance);
+
+        return sortedTokens;
+    }
+
+    public static class TokenLengthComparator implements Comparator<Punctuator> {
+
+        public static final TokenLengthComparator Instance = new TokenLengthComparator();
+
+        @Override
+        public int compare(Punctuator t1, Punctuator t2) {
+            return t2.getString().length() - t1.getString().length();
+        }
+
+    }
 }

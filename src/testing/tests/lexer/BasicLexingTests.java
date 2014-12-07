@@ -54,4 +54,17 @@ public class BasicLexingTests {
 		
 		for (Token t : tokens) System.out.println(t);
 	}
+
+    @Test
+    public void lexTest3() {
+        String source = IOUtils.readFile("src/testing/code/lexer/lex_2.c");
+
+        Lexer l = new Lexer(source);
+        List<Token> tokens = l.lex();
+
+        List<Token> expected = new ArrayList<Token>();
+        expected.add(new PunctuatorToken(Punctuator.LessThanEq));
+
+        Assert.assertTrue(expected.equals(tokens));
+    }
 }

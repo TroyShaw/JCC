@@ -9,8 +9,19 @@ import compiler.lexer.Punctuator;
  */
 public class PunctuatorToken extends Token {
 
+    private Punctuator operator;
+
 	public PunctuatorToken(Punctuator operator) {
 		super(operator.getString());
+
+        this.operator = operator;
 	}
 
+    public Punctuator getPunctuator() {
+        return operator;
+    }
+
+    public boolean matches(Punctuator punctuator) {
+        return punctuator == operator;
+    }
 }
