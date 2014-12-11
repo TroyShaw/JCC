@@ -1,7 +1,15 @@
 package compiler.lexer;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 /**
  * Encapsulates the process of character/ string access to simplify the process of lexing.
+ * 
+ * Also provides a service to "push" and "pop" states. 
+ * Before parsing a complex expression which may fail, you can call push().
+ * This saves the current buffer position. 
+ * If the lexing fails, you can then call pop() to return it to the original position.
  * 
  * @author troy
  */
@@ -10,12 +18,32 @@ public class LexerBuffer {
 	private StringBuffer input;
 	private int pos;
 
+	private Deque<Integer> positionStack = new ArrayDeque<Integer>();
+	
 	public LexerBuffer(String text) {
 		input = new StringBuffer(text);
 	}
 	
 	public LexerBuffer(StringBuffer buffer) {
 		input = buffer;
+	}
+	
+	/**
+	 * Pushes the current position onto the stack.
+	 * Note this doesn't change the contents of the buffer, just 
+	 * the internal position pointer.
+	 */
+	public void push() {
+		positionStack.push(pos);
+	}
+	
+	/**
+	 * Pops the last position off the stack, and sets position to it.
+	 * Note this doesn't change the contents of the buffer, just 
+	 * the internal position pointer.
+	 */
+	public void pop() {
+		pos = positionStack.pop();
 	}
 	
 	/**
@@ -79,6 +107,25 @@ public class LexerBuffer {
 		
 		return true;
 	}
+
+    /**
+     * Attempts to match against any of the given strings.
+     * If any of the strings match, the string is consumed, then we return true.
+     * If none match, this does nothing, and we return false.
+     *
+     * @param args the strings to test against
+     * @return true if any match, false otherwise
+     */
+    public boolean tryConsume(String ... args) {
+        for (String s : args) {
+            if (matches(s)) {
+                consume(s);
+                return true;
+            }
+        }
+
+        return false;
+    }
 	
 	/**
 	 * Retrieves all characters in the buffer that match the given CharType 

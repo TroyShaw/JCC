@@ -1,0 +1,61 @@
+This document outlines the tokens in C99
+
+Tokens:
+    - constant
+    - identifier
+    - keyword
+    - punctuator
+
+Four main constants in C
+    - string
+    - char
+    - integer
+    - floating
+
+
+identifier
+==========
+
+Identifier's basic form is:
+
+identifier:
+    | identifier_start identifier_rest*
+
+identifier_start = a-z, A-Z, _              (characters and underscore)
+identifier_rest  = a-z, A-Z, _ 0-9          (characters, underscore and numerical)
+
+There is a complication though with Universal Character Names (UCN).
+This is characters of the form:
+
+UCN:
+    | \u hex-quad
+    | \U hex-quad hex-quad
+
+hex-quad:
+    hex-char hex-char hex-char hex-char
+
+Basically lowercase \u followed by 4 hexadecimal characters, or \U followed by 8 hexadecimal characters.
+
+A UCN can be used in place of any character in an identifier (including the first character).
+
+
+keyword
+=======
+
+A keyword is basically an identifier where the characters match some specific ones predefined.
+This is a good description, and also how the implementation works.
+
+
+
+Punctuator
+==========
+
+These are special groupings of tokens such as ++, -=, *, etc.
+Full list in the standard.
+
+
+
+Constants
+=========
+
+Refer to the constants.txt file.

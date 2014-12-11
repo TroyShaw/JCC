@@ -11,6 +11,9 @@ import compiler.lexer.token.PunctuatorToken;
 import compiler.lexer.token.StringToken;
 import compiler.lexer.token.Token;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Class provides helper methods to lex certain language elements.
  * 
@@ -95,26 +98,135 @@ public class LexerHelper {
 	 * @return
 	 */
 	public boolean tryLexNumericalLiteral() {
-		if (!isNumericalStart()) return false;
-		
-		// Floating point constants always start with the form
-		// [digit-sequence] . [digit sequence]     or
-		// digit-sequence . [digit sequence]
-		// So we can tell a floating point if we have either a decimal, or a 
-		// decimal after a single dot
-		
-		String lhs = scanDecimalNumber();
-		
-		if (b.tryConsume(".")) {
-			//a floating point value
-			String rhs = scanDecimalNumber();
-			
-			return setToken(new FloatingToken(lhs + "." + rhs));
-		} else {
-			//was a simple integer
-			return setToken(new IntegerToken(lhs));
-		}
+		return tryLexFloat() || tryLexInt();
 	}
+
+    /**
+     * Tries to match against an integer constant.
+     *
+     * There are three main forms, decimal, octal, hexadecimal, all with an optional suffix.
+     *
+     * @return true if it matched, false otherwise
+     */
+    private boolean tryLexInt() {
+        b.push();
+
+        Token newInt = null;
+
+        String rest;
+
+        //first match the numerical part of the integer
+        if (b.tryConsume("0x", "0X")) {
+            rest = b.nextMatching(CharType.Hex);
+
+            newInt = new IntegerToken(rest);
+        } else if (b.matches("0")) {
+            rest = b.nextMatching(CharType.Octal);
+
+            newInt = new IntegerToken(rest);
+        } else if (b.matches(CharType.Decimal)) {
+            rest = b.nextMatching(CharType.Decimal);
+
+            newInt = new IntegerToken(rest);
+        } else {
+            //none matched, not an integer constant
+            b.pop();
+
+            return false;
+        }
+
+        //now match the optional suffix
+        String suffix = b.nextMatching(CharType.Character);
+
+        List<String> validSuffixes = Arrays.asList("", "u", "U", "l", "L", "ll", "LL",
+                "ul", "uL", "Ul", "UL",
+                "ull", "uLL", "Ull", "ULL",
+                "lu", "lU", "Lu", "LU",
+                "llu", "llU", "LLu", "LLU");
+
+        if (!validSuffixes.contains(suffix)) {
+            //invalid floating point suffix
+            throw new RuntimeException("invalid suffix \"" + suffix + "\" on integer constant");
+        }
+
+        return setToken(new IntegerToken(rest + suffix));
+    }
+
+    /**
+     * Tries to lex a floating point literal.
+     *
+     * There are two forms of floating point constant, decimal and hexidecimal.
+     *
+     * @return true if it matched, false otherwise
+     */
+    private boolean tryLexFloat() {
+        b.push();
+
+        String result = "";
+
+        String intPart = "";
+        String floatPart = "";
+
+        boolean requiresExponent = false;
+
+        if (b.tryConsume("0x", "0X")) {
+            //a hex floating constant
+            b.pop();
+            return false;
+        } else {
+            //a decimal floating constant
+            intPart = b.nextMatching(CharType.Decimal);
+
+            if (!intPart.isEmpty() && b.matches("e", "E")) {
+                //we've got an exponent form float
+                requiresExponent = true;
+            } else if (b.tryConsume(".")) {
+                //we've got a float in the form x.x
+                floatPart = b.nextMatching(CharType.Decimal);
+            } else {
+                //we don't have a float
+                b.pop();
+
+                return false;
+            }
+        }
+
+        int sign = 1;
+        String exponent = "1";
+
+        //exponent
+        if (b.tryConsume("e", "E")) {
+
+            if (b.tryConsume("-")) sign = -1;
+            else if (b.tryConsume("+")) sign = 1;
+
+            exponent = b.nextMatching(CharType.Decimal);
+
+            if (exponent.isEmpty()) throw new RuntimeException("Exponent has no digits");
+
+        } else if (requiresExponent) {
+            // There was no dot, and we needed an exponent to be a floating.
+            // Might be an integer though...
+            b.pop();
+
+            return false;
+        }
+
+        //optional floating suffix
+        String suffix = b.nextMatching(CharType.Character);
+
+        //verify it is correct
+        List<String> validSuffixes = Arrays.asList("", "f", "F", "l", "L");
+
+        if (!validSuffixes.contains(suffix)) {
+            //invalid floating point suffix
+            throw new RuntimeException("invalid suffix \"" + suffix + "\" on floating constant");
+        }
+
+        String signStr = sign == 1 ? "+" : "-";
+
+        return setToken(new FloatingToken(intPart + "." + floatPart + "e" + signStr + exponent + suffix));
+    }
 	
 	/**
 	 * Tries to lex an identifier or keyword, returning true if this succeeds.
@@ -289,31 +401,34 @@ public class LexerHelper {
 	 * @return
 	 */
 	private String scanUniversalCharacterName() {
-		String ox;
+		if (b.tryConsume("\\u")) {
+			return "\\u" + consumeUCNHexQuad();
+		} else if (b.tryConsume("\\U")) {
+			return "\\U" + consumeUCNHexQuad() + consumeUCNHexQuad();
+		} else {
+			throw syntaxError("invalid UCN string");
+		}
+	}
+	
+	/**
+	 * Consumes 4 characters which should valid hex characters.
+	 * 
+	 * @return a string of length 4 containing valid hex characters.
+	 */
+	private String consumeUCNHexQuad() {
+		String toReturn = "";
 		
-		if (b.tryConsume("\\u")) ox = "\\u";
-		else if (b.tryConsume("\\u")) ox = "\\u";
-		else throw syntaxError("invalid UCN string");
-		
-		char c;
-		
-		//first match the guaranteed 4
 		for (int i = 0; i < 4; i++) {
-			c = b.peekChar();
+			char c = b.peekChar();
 			
 			if (!CharType.Hex.matches(c)) {
 				throw syntaxError("UCN requires at least 4 hex digits");
 			}
 			
-			ox += b.consumeChar();
+			toReturn += b.consumeChar();
 		}
 		
-		//now we must try match 4. If a non-hex is found, we must revert our scan
-		for (int i = 0; i < 4; i++) {
-			
-		}
-		
-		return null;
+		return toReturn;
 	}
 	
 	/**
@@ -341,7 +456,7 @@ public class LexerHelper {
 	 * Private helper method which sets the internal token to the given
 	 * value then returns true.
 	 * 
-	 * @param t
+	 * @param token
 	 * @return
 	 */
 	private boolean setToken(Token token) {

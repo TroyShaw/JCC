@@ -22,12 +22,13 @@ x - main preprocessing directives (to outline later)
 Lexing
 ======
 
-* - token OO representation
+x - token OO representation
         still need to represent all the different language elements (constant modifiers, etc)
 
 o - punctuators tokens
 
-o - Keywords, Identifiers
+o - Keywords
+o - Identifiers ()
 
 * - numerical literals
     * - integer
@@ -36,7 +37,7 @@ o - Keywords, Identifiers
         * - hexidecimal
         * - integer
 
-o - string literal
+x - string literal
 
 x - char literals
         still need to support hex/ numerical values inside chars

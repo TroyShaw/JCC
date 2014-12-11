@@ -60,7 +60,17 @@ public enum CharType {
 			return IdentifierStart.matches(c) || Decimal.matches(c);
 		}
 	},
-	
+
+    /**
+     * A character is any of a-z or A-Z.
+     */
+    Character {
+        @Override
+        public boolean matches(char c) {
+            return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+        }
+    },
+
 	/**
 	 * Whitespace is defined as:
 	 *  - space character
