@@ -7,8 +7,7 @@ package compiler.lexer.token;
  */
 public class FloatingToken extends LiteralToken {
 
-
-	public FloatingToken(String floatingValue) {
-		super(floatingValue, Literal.Floating);
-	}
+    public FloatingToken(String lhs, String rhs, int exponentSign, String exponent, String floatingSuffix, NumericType numericType) {
+        super("", Literal.Floating);
+    }
 }

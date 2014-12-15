@@ -7,7 +7,13 @@ package compiler.lexer.token;
  */
 public class IntegerToken extends LiteralToken {
 
-	public IntegerToken(String intString) {
-		super(intString, Literal.Integer);
-	}
+    private NumericType intType;
+    private String suffix;
+
+    public IntegerToken(String intString, String suffix, NumericType intType) {
+        super(intString, Literal.Integer);
+
+        this.intType = intType;
+        this.suffix = suffix;
+    }
 }

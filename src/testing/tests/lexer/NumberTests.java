@@ -15,7 +15,16 @@ public class NumberTests {
     public void testInt() {
         String intStr = "0x123123";
 
+        double f = 3.2;
+
         doIntTest(intStr, "23");
+    }
+
+    @Test
+    public void testWeirdDouble() {
+        String doubleStr = "...";
+
+        doDoubleTest(doubleStr, "23");
     }
 
     @Test

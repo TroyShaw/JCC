@@ -68,11 +68,11 @@ Decimal constants are those that are left, start with 1-9, then any number of di
 Every integer constant can also have an optional integer suffix, as described in the grammar above.
 
 Valid combinations are:
-    u, U, l, L, ll, LL
-    ul, uL, Ul, UL
-    ull, uLL, Ull, ULL
-    lu, lU, Lu, LU
-    llu, llU, LLu, LLU
+    "u", "U", "l", "L", "ll", "LL",
+    "ul", "uL", "Ul", "UL",
+    "ull", "uLL", "Ull", "ULL",
+    "lu", "lU", "Lu", "LU",
+    "llu", "llU", "LLu", "LLU");
 
 
 floating constant

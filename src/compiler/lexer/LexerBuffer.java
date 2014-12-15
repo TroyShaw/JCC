@@ -75,7 +75,15 @@ public class LexerBuffer {
 		
 		return false;
 	}
-	
+
+    /**
+     * Returns true if there is a character in the buffer, and it matches the given
+     * character type.
+     * This does not consume any characters.
+     *
+     * @param type the character type
+     * @return true if a match, false otherwise
+     */
 	public boolean matches(CharType type) {
 		return hasChar() && type.matches(peekChar());
 	}

@@ -1,15 +1,6 @@
 package compiler.lexer;
 
-import compiler.lexer.token.CharacterToken;
-import compiler.lexer.token.EscapeCharacter;
-import compiler.lexer.token.FloatingToken;
-import compiler.lexer.token.IdentifierToken;
-import compiler.lexer.token.IntegerToken;
-import compiler.lexer.token.KeywordToken;
-import compiler.lexer.token.LiteralToken;
-import compiler.lexer.token.PunctuatorToken;
-import compiler.lexer.token.StringToken;
-import compiler.lexer.token.Token;
+import compiler.lexer.token.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,9 +25,16 @@ public class LexerHelper {
 	}
 	
 	/**
-	 * Returns the last lexed token.
+	 * Each lexing method either returns true or false.
+     * If the method returns true, it means a lex was successful, and
+     * this method should be called to get the successfully lexed token.
+     *
+     * This method will always return the last successfully lexed token, so calling after
+     * an unsuccessful lex will still return that same last token.
+     *
+     * This method will return null until a successful lex happens.
 	 * 
-	 * @return
+	 * @return the last lexed token.
 	 */
 	public Token getToken() {
 		return lastLexedToken;
@@ -45,7 +43,7 @@ public class LexerHelper {
 	/**
 	 * Tries to lex a string literal, returning true if it succeeds.
 	 * 
-	 * @return
+	 * @return true if successful
 	 */
 	public boolean tryLexStringLiteral() {
 		if (!b.matches("\"", "L\"")) return false;
@@ -54,37 +52,53 @@ public class LexerHelper {
 		
 		b.consume("\"");
 
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 
 		while (b.hasChar()) {
 			char c = scanSimpleChar();
 
-			if (c == '"') return setToken(new StringToken(buffer.toString(), isWide));
+            if (c == '\n') {
+                throw syntaxError("non-terminated string literal");
+            }
+
+			if (c == '"') {
+                return setToken(new StringToken(buffer.toString(), isWide));
+            }
 
 			buffer.append(c);
 		}
 
 		throw syntaxError("Reached EOF while parsing string literal");
 	}
-	
+
 	/**
 	 * Tries to lex a character literal, returning true if it succeeds.
 	 * 
-	 * @return
+	 * @return true if successful
 	 */
 	public boolean tryLexCharLiteral() {
-		if (!b.matches("\'", "L'")) return false;
-		
+		if (!b.matches("'", "L'")) return false;
+
 		boolean isWide = b.tryConsume("L");
 		
-		b.consume("\'");
+		b.consume("'");
 		
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		
 		while (b.hasChar()) {
 			char c = scanSimpleChar();
-			
-			if (c == '\'') return setToken(new CharacterToken(buffer.toString(), isWide));
+
+            if (c == '\n') {
+                throw syntaxError("non-terminated character literal");
+            }
+
+			if (c == '\'') {
+                if (buffer.length() == 0) {
+                    throw syntaxError("empty character literal");
+                }
+
+                return setToken(new CharacterToken(buffer.toString(), isWide));
+            }
 			
 			buffer.append(c);
 		}
@@ -95,7 +109,7 @@ public class LexerHelper {
 	/**
 	 * Tries to lex a numerical literal, returning true if it succeeds.
 	 * 
-	 * @return
+	 * @return true if successful
 	 */
 	public boolean tryLexNumericalLiteral() {
 		return tryLexFloat() || tryLexInt();
@@ -111,23 +125,23 @@ public class LexerHelper {
     private boolean tryLexInt() {
         b.push();
 
-        Token newInt = null;
-
-        String rest;
+        String intString;
+        NumericType numericType;
 
         //first match the numerical part of the integer
         if (b.tryConsume("0x", "0X")) {
-            rest = b.nextMatching(CharType.Hex);
+            intString = b.nextMatching(CharType.Hex);
+            numericType = NumericType.Hexidecimal;
 
-            newInt = new IntegerToken(rest);
+            if (intString.length() == 0) {
+                throw syntaxError("empty hex int constant");
+            }
         } else if (b.matches("0")) {
-            rest = b.nextMatching(CharType.Octal);
-
-            newInt = new IntegerToken(rest);
+            intString = b.nextMatching(CharType.Octal);
+            numericType = NumericType.Octal;
         } else if (b.matches(CharType.Decimal)) {
-            rest = b.nextMatching(CharType.Decimal);
-
-            newInt = new IntegerToken(rest);
+            intString = b.nextMatching(CharType.Decimal);
+            numericType = NumericType.Decimal;
         } else {
             //none matched, not an integer constant
             b.pop();
@@ -138,7 +152,8 @@ public class LexerHelper {
         //now match the optional suffix
         String suffix = b.nextMatching(CharType.Character);
 
-        List<String> validSuffixes = Arrays.asList("", "u", "U", "l", "L", "ll", "LL",
+        List<String> validSuffixes = Arrays.asList(
+                "", "u", "U", "l", "L", "ll", "LL",
                 "ul", "uL", "Ul", "UL",
                 "ull", "uLL", "Ull", "ULL",
                 "lu", "lU", "Lu", "LU",
@@ -149,22 +164,20 @@ public class LexerHelper {
             throw new RuntimeException("invalid suffix \"" + suffix + "\" on integer constant");
         }
 
-        return setToken(new IntegerToken(rest + suffix));
+        return setToken(new IntegerToken(intString, suffix, numericType));
     }
 
     /**
      * Tries to lex a floating point literal.
      *
-     * There are two forms of floating point constant, decimal and hexidecimal.
+     * There are two forms of floating point constant, decimal and hexadecimal.
      *
      * @return true if it matched, false otherwise
      */
     private boolean tryLexFloat() {
         b.push();
 
-        String result = "";
-
-        String intPart = "";
+        String intPart;
         String floatPart = "";
 
         boolean requiresExponent = false;
@@ -223,20 +236,18 @@ public class LexerHelper {
             throw new RuntimeException("invalid suffix \"" + suffix + "\" on floating constant");
         }
 
-        String signStr = sign == 1 ? "+" : "-";
-
-        return setToken(new FloatingToken(intPart + "." + floatPart + "e" + signStr + exponent + suffix));
+        return setToken(new FloatingToken(intPart, floatPart, sign, exponent, suffix, NumericType.Decimal));
     }
 	
 	/**
 	 * Tries to lex an identifier or keyword, returning true if this succeeds.
 	 * 
-	 * @return
+	 * @return true if an identifier or keyword is lexed, false otherwise
 	 */
 	public boolean tryLexIdenOrKeyword() {
 		if (!b.matches(CharType.IdentifierStart)) return false;
 		
-		String word = matchIdentifier();
+		String word = b.nextMatching(CharType.IdentifierRest);
 		
 		// Check if the word is a keyword
 		for (Keyword k : Keyword.values()) {
@@ -248,11 +259,11 @@ public class LexerHelper {
 		//Otherwise it must be an identifier
 		return setToken(new IdentifierToken(word));
 	}
-	
+
 	/**
 	 * Tries to lex a punctuator, returning true if it succeeds.
 	 * 
-	 * @return
+	 * @return true if a punctuator is lexed, false otherwise
 	 */
 	public boolean tryLexPunctuator() {
 		for (Punctuator o : Punctuator.getSortedPunctuators()) {
@@ -263,20 +274,7 @@ public class LexerHelper {
 		
 		return false;
 	}
-	
-	/**
-	 * Scans tokens until a non-identifier token is found, returning the identifier
-	 * formed in this process.
-	 * 
-	 * This method assumes at least 1 character is in the buffer that can start the
-	 * identifier.
-	 * 
-	 * @return
-	 */
-	private String matchIdentifier() {
-		return b.nextMatching(CharType.IdentifierRest);
-	}
-	
+
 	 /**
 	 * Scans the next char in the input, consuming and returning it.
 	 * 
@@ -286,14 +284,46 @@ public class LexerHelper {
 	 * Handles escape characters properly, consuming 2 chars for an escaped char.
 	 * If EOF is reached, a syntax error is thrown.
 	 * 
-	 * @return
+	 * @return a simple char
 	 */
 	private char scanSimpleChar() {
 		char c = b.consumeChar();
 		
 		if (c != '\\') return c;
-		
-		//we've got an escaped char
+
+        // Do hex constant. This is \x[hex]+
+        if (b.tryConsume("x")) {
+            String hex = b.nextMatching(CharType.Hex);
+
+            if (hex.length() == 0) {
+                throw syntaxError("\\x used with no following hex digits");
+            }
+
+            return (char) hex.hashCode();
+        }
+
+        // Do octal constant. This is a sequence of 1, 2 or 3 octal digits
+        if (b.matches(CharType.Octal)) {
+            String chars = "";
+
+            for (int i = 0; i < 3; i++) {
+                if (!b.matches(CharType.Octal)) break;
+
+                chars += b.consumeChar();
+            }
+
+            return (char) chars.hashCode();
+        }
+
+        // Do universal character name
+        if (b.matches("u", "U")) {
+            String ucn = scanUniversalCharacterName();
+
+            return (char) ucn.hashCode();
+        }
+
+
+		// Do standard escape sequences
 		c = b.consumeChar();
 		
 		for (EscapeCharacter esChar : EscapeCharacter.values()) {
@@ -301,104 +331,16 @@ public class LexerHelper {
 				return esChar.getEscapedChar();
 			}
 		}
-		
-		throw syntaxError("unrecognised escape character");
-	}
-	
-	/**
-	 * Scans a numerical literal.
-	 * 
-	 * @return
-	 */
-	private LiteralToken scanNumericLiteral() {
-		String firstNum = scanNumeric();
-		
-		if (b.tryConsume(".")) {
-			String secondNum = scanNumeric();
-			
-			return new FloatingToken(firstNum + "." + secondNum);
-		} else {
-			return new IntegerToken(firstNum);
-		}
-	}
-	
-	/**
-	 * Scans from the current character until the last that isn't a number.
-	 * These characters are concatenated and returned.
-	 * 
-	 * The lexer-helpers internal offset is moved by calling this function.
-	 * 
-	 * If no number can be made, an exception is thrown.
-	 * 
-	 * @return
-	 */
-	private String scanNumeric() {
-		if (!b.hasChar()) throw syntaxError("Reached EOF while parsing numeric value");
-		if (!Character.isDigit(b.peekChar())) throw syntaxError("Non-numeric character found instead of digit");
-			
-		StringBuffer buffer = new StringBuffer();
-		
-		while (Character.isDigit(b.peekChar())) buffer.append(b.consumeChar());
-			
-		return buffer.toString();
-	}
-	
-	/**
-	 * Scans a c integer constant.
-	 * 
-	 * @return
-	 */
-	private LiteralToken scanIntegerConstant() {
-		if (b.tryConsume("0x") || b.tryConsume("0X")) {
-			//hexidecimal constant
-		} else if (b.tryConsume("0")) {
-			//octal constant
-		} else {
-			//normal integer constant
-		}
-		
-		return null;
-	}	
-	
-	/**
-	 * Scans and returns the next hex string.
-	 * @return
-	 */
-	private String scanHexString() {
-		String ox;
-		
-		if (b.tryConsume("0x")) ox = "0x";
-		else if (b.tryConsume("0X")) ox = "0x";
-		else throw syntaxError("invalid hex string");
-		
-		//now scan digits
-		char c = b.peekChar();
-		
-		if (!CharType.Hex.matches(c)) {
-			throw syntaxError("incomplete hex string");
-		}
-		
-		return ox + scanHexNumber();
+
+		throw syntaxError("unrecognised escape character: " + c);
 	}
 
-	private String scanDecimalNumber() {
-		return b.nextMatching(CharType.Decimal);
-	}
-	
-	private String scanOctalNumber() {
-		return b.nextMatching(CharType.Octal);
-	}
-	
-	private String scanHexNumber() {
-		return b.nextMatching(CharType.Hex);
-	}
-	
 	/**
 	 * Scans a single universal character name.
 	 * 
 	 * This assumes a valid UCN is currently present in the buffer.
 	 * 
-	 * @return
+	 * @return a scanned universal character name
 	 */
 	private String scanUniversalCharacterName() {
 		if (b.tryConsume("\\u")) {
@@ -432,32 +374,11 @@ public class LexerHelper {
 	}
 	
 	/**
-	 * Returns true if the current buffer is the start of a numerical constant.
-	 * 
-	 * @return
-	 */
-	private boolean isNumericalStart() {
-		// A numerical value either starts with a digit, or a dot followed by a digit
-		if (b.matches(CharType.Decimal)) return true;
-		
-		if (b.peekChar() == '.') {
-			// Check the next digit is numerical. Be sure the preserve the buffer state.
-			b.consumeChar();
-			char c = b.peekChar();
-			b.rewind();
-			
-			return CharType.Decimal.matches(c);
-		} else {
-			return false;
-		}
-	}
-	
-	/**
 	 * Private helper method which sets the internal token to the given
 	 * value then returns true.
 	 * 
-	 * @param token
-	 * @return
+	 * @param token the token to set
+	 * @return true always
 	 */
 	private boolean setToken(Token token) {
 		lastLexedToken = token;
