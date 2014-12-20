@@ -1,5 +1,7 @@
 package compiler.lexer.token;
 
+import compiler.lexer.token.cString.CCharSequence;
+
 /**
  * Class defines a character constant token.
  * 
@@ -7,8 +9,8 @@ package compiler.lexer.token;
  */
 public class CharacterToken extends LiteralToken {
 
-	public CharacterToken(String characterValue, boolean isWide) {
-		super(characterValue, Literal.Character);
+	public CharacterToken(CCharSequence charSequence) {
+		super(charSequence.getString(), Literal.Character);
 	}
 
 }

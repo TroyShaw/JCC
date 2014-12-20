@@ -1,6 +1,7 @@
 package compiler.lexer;
 
 import compiler.lexer.token.*;
+import compiler.lexer.token.cString.CCharSequence;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,27 +49,9 @@ public class LexerHelper {
 	public boolean tryLexStringLiteral() {
 		if (!b.matches("\"", "L\"")) return false;
 
-		boolean isWide = b.tryConsume("L");
-		
-		b.consume("\"");
+        CCharSequence sequence = parseCharacterString('"');
 
-		StringBuilder buffer = new StringBuilder();
-
-		while (b.hasChar()) {
-			char c = scanSimpleChar();
-
-            if (c == '\n') {
-                throw syntaxError("non-terminated string literal");
-            }
-
-			if (c == '"') {
-                return setToken(new StringToken(buffer.toString(), isWide));
-            }
-
-			buffer.append(c);
-		}
-
-		throw syntaxError("Reached EOF while parsing string literal");
+        return setToken(new StringToken(sequence));
 	}
 
 	/**
@@ -77,34 +60,40 @@ public class LexerHelper {
 	 * @return true if successful
 	 */
 	public boolean tryLexCharLiteral() {
-		if (!b.matches("'", "L'")) return false;
+        if (!b.matches("'", "L'")) return false;
 
-		boolean isWide = b.tryConsume("L");
-		
-		b.consume("'");
-		
-		StringBuilder buffer = new StringBuilder();
-		
-		while (b.hasChar()) {
-			char c = scanSimpleChar();
+        CCharSequence sequence = parseCharacterString('\'');
+
+        if (sequence.length() == 0) {
+            throw syntaxError("empty character literal");
+        }
+
+        return setToken(new CharacterToken(sequence));
+	}
+
+    private CCharSequence parseCharacterString(char delimiter) {
+        boolean isWide = b.tryConsume("L");
+
+        b.consume(delimiter);
+
+        CCharSequence sequence = new CCharSequence(isWide);
+
+        while (b.hasChar()) {
+            char c = scanSimpleChar();
 
             if (c == '\n') {
-                throw syntaxError("non-terminated character literal");
+                throw syntaxError("expected terminating " + delimiter);
             }
 
-			if (c == '\'') {
-                if (buffer.length() == 0) {
-                    throw syntaxError("empty character literal");
-                }
-
-                return setToken(new CharacterToken(buffer.toString(), isWide));
+            if (c == delimiter) {
+                return sequence;
             }
-			
-			buffer.append(c);
-		}
-		
-		throw syntaxError("Reached EOF while parsing char literal");
-	}
+
+            sequence.addChar(c);
+        }
+
+        throw syntaxError("expected terminating " + delimiter);
+    }
 	
 	/**
 	 * Tries to lex a numerical literal, returning true if it succeeds.
@@ -321,7 +310,6 @@ public class LexerHelper {
 
             return (char) ucn.hashCode();
         }
-
 
 		// Do standard escape sequences
 		c = b.consumeChar();

@@ -51,7 +51,7 @@ public class LexerBuffer {
 	 *
 	 * This implies the buffer has enough characters left, and the characters actually match.
 	 *
-	 * @param toMatch the string to match q
+	 * @param toMatch the string to match
 	 * @return true if there is a match
 	 */
 	public boolean matches(String toMatch) {
@@ -65,7 +65,7 @@ public class LexerBuffer {
 	 * Equivalent to calling the matches() function on each string individually, and
 	 * returning the first true, or false otherwise.
 	 * 
-	 * @param toMatch
+	 * @param toMatch a variadic
 	 * @return
 	 */
 	public boolean matches(String ... toMatch) {
@@ -93,19 +93,30 @@ public class LexerBuffer {
 	 * 
 	 * If the string is not directly present, an error is thrown.
 	 * 
-	 * @param toConsume
+	 * @param toConsume the string to consume
 	 */
 	public void consume(String toConsume) {
 		if (!matches(toConsume)) throw new Error("error consuming: " + toConsume);
 		
 		pos += toConsume.length();
 	}
+
+	/**
+	 * Consumes the given character.
+	 *
+	 * If the character is not directly present, an error is thrown.
+	 *
+	 * @param toConsume the character to consume
+	 */
+	public void consume(char toConsume) {
+		consume(Character.toString(toConsume));
+	}
 	
 	/**
 	 * Attempts to consume the given string, consuming if present.
 	 * If the string does not immediately match, this method does nothing.
 	 * 
-	 * @param toConsume
+	 * @param toConsume the string to consume
 	 * @return true if the string matched, false otherwise
 	 */
 	public boolean tryConsume(String toConsume) {
