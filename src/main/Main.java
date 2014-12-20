@@ -11,7 +11,8 @@ public class Main {
 	
 	public static void main(String[] args) {
 		cmdParser = new CommandLineParser(args);
-		
+        cmdParser.parseArguments();
+
 		if (cmdParser.wantsHelp()) {
 			System.out.println(Info.getHelp());
 		}

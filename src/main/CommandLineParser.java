@@ -26,14 +26,16 @@ public class CommandLineParser {
 	
 	/**
 	 * Instantiates a new CommandLineParser.
-	 * @param commands
+     *
+	 * @param commands array containing the arguments
 	 */
 	public CommandLineParser(String[] commands) {
 		this.commands = commands;
 	}
 
 	/**
-	 * Parses the arguments.
+	 * Parses the arguments, setting the internal flags based on
+     * the input.
 	 */
 	public void parseArguments() {
 		for (int i = 0; i < commands.length; i++) {
