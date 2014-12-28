@@ -8,4 +8,8 @@ public class BreakStatement extends Statement {
     public BreakStatement() {
         //empty
     }
+
+    public String output() {
+        return "break;";
+    }
 }

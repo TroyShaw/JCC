@@ -14,4 +14,11 @@ public class SwitchStatement extends Statement {
         this.switchExpr = switchExpr;
         this.body = body;
     }
+
+    public String output() {
+        StringBuilder builder = new StringBuilder();
+
+
+        return "";
+    }
 }

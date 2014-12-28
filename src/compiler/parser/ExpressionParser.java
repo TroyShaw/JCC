@@ -1,5 +1,7 @@
 package compiler.parser;
 
+import compiler.language.expressions.*;
+import compiler.lexer.Keyword;
 import compiler.lexer.Punctuator;
 import compiler.lexer.token.*;
 
@@ -10,163 +12,308 @@ import java.util.List;
  */
 public class ExpressionParser {
 
-    private int index = 0;
-    private List<Token> tokens;
+    private Parser parentParser;
+    private ParserBuffer b;
 
-    public ExpressionParser(List<Token> tokens) {
-        this.tokens = tokens;
+    public ExpressionParser(Parser parentParser, ParserBuffer b) {
+        this.parentParser = parentParser;
+        this.b = b;
     }
 
-    public Node parseMath() {
-        return parseAdd();
+    public Expression parseExpression() {
+        return parseCommaExpression();
     }
 
-    private Node parseAddOld() {
-        Node lhs = parseMult();
+    private Expression parseCommaExpression() {
+        Expression lhs = parseAssignment();
 
-        if (tryMatchPunctuator(Punctuator.Plus)) {
-            Node rhs = parseMath();
+        while (b.tryConsume(Punctuator.Comma)) {
+            Expression rhs = parseCommaExpression();
 
-            return new Node.AddNode(lhs, rhs);
-        } if (tryMatchPunctuator(Punctuator.Minus)) {
-            Node rhs = parseMath();
-
-            return new Node.MinusNode(lhs, rhs);
-        } else {
-            return lhs;
-        }
-    }
-
-    private Node parseAdd() {
-        Node lhs = parseMult();
-
-        Punctuator p;
-        while ((p = tryMatchPunctuators(Punctuator.Plus, Punctuator.Minus)) != null) {
-            //Node rhs = parseMath();
-            Node rhs = parseMult();
-
-            lhs = new Node.OperatorNode(lhs, rhs, p);
+            lhs = new CommaExpression(lhs, rhs);
         }
 
         return lhs;
     }
 
-    private Node parseMult() {
-        Node lhs = parseParen();
+    private Expression parseAssignment() {
+        Expression lhs = parseTernaryConditional();
 
-        Punctuator p;
-        while ((p = tryMatchPunctuators(Punctuator.Asterisk, Punctuator.Slash)) != null) {
-            //Node rhs = parseMath();
-            Node rhs = parseParen();
+        Punctuator[] punctuators = {
+                Punctuator.Equal,
+                Punctuator.MultiplyAssign, Punctuator.DivideAssign, Punctuator.RemainderAssign,
+                Punctuator.PlusAssign, Punctuator.MinusAssign,
+                Punctuator.LeftShiftAssign, Punctuator.RightShiftAssign,
+                Punctuator.BitwiseAndAssign, Punctuator.BitwiseOrAssign, Punctuator.BitwiseXorAssign
+        };
 
-            lhs = new Node.OperatorNode(lhs, rhs, p);
+        if (b.tryConsume(punctuators)) {
+            Punctuator p = b.lastMatchedPunctuator();
+
+            Expression rhs = parseAssignment();
+
+            return new AssignmentExpression(lhs, rhs, p);
         }
-
-//        if (tryMatchPunctuator(Punctuator.Asterisk)) {
-//            Node rhs = parseMath();
-//
-//            return new Node.MultNode(lhs, rhs);
-//        } if (tryMatchPunctuator(Punctuator.Slash)) {
-//            Node rhs = parseMath();
-//
-//            return new Node.DivideNode(lhs, rhs);
-//        }  else {
-//            return lhs;
-//        }
 
         return lhs;
     }
 
-    private Node parseAssign() {
-        return null;
-    }
+    private Expression parseTernaryConditional() {
+        Expression conditionalExpr = parseLogicalOr();
 
-    private Node parseParen() {
-        if (tryMatchPunctuator(Punctuator.LeftParenthesis)) {
-            Node e = parseMath();
-            matchPunctuator(Punctuator.RightParenthesis);
+        if (b.tryConsume(Punctuator.QuestionMark)) {
+            Expression lhs = parseTernaryConditional();
+            b.consume(Punctuator.Colon);
+            Expression rhs = parseTernaryConditional();
 
-            return e;
-        } else {
-            return getNumNode();
-        }
-    }
-
-    private Node parsePrimary() {
-        Token n = consumeToken();
-
-        if (n instanceof IntegerToken) {
-
-        } else if (n instanceof FloatingToken) {
-
-        } else if (n instanceof CharacterToken) {
-
-        } else if (n instanceof IdentifierToken) {
-
-        } else if (n instanceof StringToken) {
-
-        } else if (tryMatchPunctuator(Punctuator.LeftParenthesis)) {
-
+            return new TernaryConditionalExpression(conditionalExpr, lhs, rhs);
         }
 
-        return null;
+        return conditionalExpr;
     }
 
-    private boolean tryMatchPunctuator(Punctuator punctuator) {
-        if (!hasToken()) return false;
+    private Expression parseLogicalOr() {
+        Expression lhs = parseLogicalAnd();
 
-        Token t = peekToken();
+        while (b.tryConsume(Punctuator.LogicalOr)) {
+            Punctuator punctuator = b.lastMatchedPunctuator();
 
-        if (t instanceof PunctuatorToken) {
-            PunctuatorToken puncToken = (PunctuatorToken) t;
+            Expression rhs = parseLogicalAnd();
+            lhs = new BinOpExpression(lhs, rhs, punctuator);
+        }
 
-            if (puncToken.matches(punctuator)) {
-                consumeToken();
+        return lhs;
+    }
 
-                return true;
+    private Expression parseLogicalAnd() {
+        Expression lhs = parseBitwiseOr();
+
+        while (b.tryConsume(Punctuator.LogicalAnd)) {
+            Punctuator punctuator = b.lastMatchedPunctuator();
+
+            Expression rhs = parseBitwiseOr();
+            lhs = new BinOpExpression(lhs, rhs, punctuator);
+        }
+
+        return lhs;
+    }
+
+    private Expression parseBitwiseOr() {
+        Expression lhs = parseBitwiseXor();
+
+        while (b.tryConsume(Punctuator.Bar)) {
+            Punctuator punctuator = b.lastMatchedPunctuator();
+
+            Expression rhs = parseBitwiseXor();
+            lhs = new BinOpExpression(lhs, rhs, punctuator);
+        }
+
+        return lhs;
+    }
+
+    private Expression parseBitwiseXor() {
+        Expression lhs = parseBitwiseAnd();
+
+        while (b.tryConsume(Punctuator.Caret)) {
+            Punctuator punctuator = b.lastMatchedPunctuator();
+
+            Expression rhs = parseBitwiseAnd();
+            lhs = new BinOpExpression(lhs, rhs, punctuator);
+        }
+
+        return lhs;
+    }
+
+    private Expression parseBitwiseAnd() {
+        Expression lhs = parseEquality();
+
+        while (b.tryConsume(Punctuator.Ampersand)) {
+            Punctuator punctuator = b.lastMatchedPunctuator();
+
+            Expression rhs = parseEquality();
+            lhs = new BinOpExpression(lhs, rhs, punctuator);
+        }
+
+        return lhs;
+    }
+
+    private Expression parseEquality() {
+        Expression lhs = parseRelational();
+
+        while (b.tryConsume(Punctuator.EqualEqual, Punctuator.NotEqual)) {
+            Punctuator punctuator = b.lastMatchedPunctuator();
+
+            Expression rhs = parseRelational();
+            lhs = new BinOpExpression(lhs, rhs, punctuator);
+        }
+
+        return lhs;
+    }
+
+    private Expression parseRelational() {
+        Expression lhs = parseShift();
+
+        Punctuator[] relational = {
+            Punctuator.GreaterThan, Punctuator.GreaterThanEq,
+            Punctuator.LessThan, Punctuator.LessThanEq
+        };
+
+        while (b.tryConsume(relational)) {
+            Punctuator punctuator = b.lastMatchedPunctuator();
+
+            Expression rhs = parseShift();
+            lhs = new BinOpExpression(lhs, rhs, punctuator);
+        }
+
+        return lhs;
+    }
+
+    private Expression parseShift() {
+        Expression lhs = parseAdditive();
+
+        while (b.tryConsume(Punctuator.LeftShift, Punctuator.RightShift)) {
+            Punctuator punctuator = b.lastMatchedPunctuator();
+
+            Expression rhs = parseAdditive();
+            lhs = new BinOpExpression(lhs, rhs, punctuator);
+        }
+
+        return lhs;
+    }
+
+    private Expression parseAdditive() {
+        Expression lhs = parseMultiplicative();
+
+        while (b.tryConsume(Punctuator.Plus, Punctuator.Minus)) {
+            Punctuator punctuator = b.lastMatchedPunctuator();
+
+            Expression rhs = parseMultiplicative();
+            lhs = new BinOpExpression(lhs, rhs, punctuator);
+        }
+
+        return lhs;
+    }
+
+    private Expression parseMultiplicative() {
+        Expression lhs = parseCast();
+
+        while (b.tryConsume(Punctuator.Asterisk, Punctuator.Slash)) {
+            Punctuator punctuator = b.lastMatchedPunctuator();
+
+            Expression rhs = parseCast();
+            lhs = new BinOpExpression(lhs, rhs, punctuator);
+        }
+
+        return lhs;
+    }
+
+    private Expression parseCast() {
+        if (b.tryConsume(Punctuator.LeftParenthesis)) {
+            // TODO, consume a type here
+            Expression typeName = null;
+            b.consume(Punctuator.RightParenthesis);
+
+            Expression toCast = parseUnary();
+
+            return new CastExpression(typeName, toCast);
+        }
+
+        return parseUnary();
+    }
+
+    private Expression parseUnary() {
+        Expression lhs = parsePostfix();
+
+        if (b.tryConsume(Punctuator.PlusPlus, Punctuator.MinusMinus)) {
+            Punctuator p = b.lastMatchedPunctuator();
+
+            Expression expr = parsePostfix();
+
+            return new PrefixAdditive(expr, p);
+        }
+
+        Punctuator[] unaryOperators = new Punctuator[] {
+                Punctuator.Ampersand, Punctuator.Asterisk,
+                Punctuator.Plus, Punctuator.Minus,
+                Punctuator.Tilde, Punctuator.LogicalNot
+        };
+
+        if (b.tryConsume(unaryOperators)) {
+            Punctuator p = b.lastMatchedPunctuator();
+
+            Expression expr = parsePostfix();
+
+            return new UnaryExpression(expr, p);
+        }
+
+        if (b.tryConsume(Keyword.Sizeof)) {
+            // This isn't quite right
+            // It is trying to parse a sizeof (typename)
+            // Except we could have a parenthesized expression here too...
+            // Need to figure out a way to try parse just a type name
+            if (b.tryConsume(Punctuator.LeftParenthesis)) {
+                // TODO, consume a type-name here
+                Expression typeName = null;
+
+                b.consume(Punctuator.RightParenthesis);
+
+                return new SizeofTypeExpression(typeName);
             }
+
+            Expression expr = parseUnary();
+
+            return new SizeofExprExpression(expr);
         }
 
-        return false;
+        return lhs;
     }
 
-    private void matchPunctuator(Punctuator punctuator) {
-        if (!tryMatchPunctuator(punctuator)) {
-            throw new RuntimeException("Should have matched punctuator: " + punctuator);
-        }
-    }
+    private Expression parsePostfix() {
+        Expression lhs = parsePrimary();
 
-    public Punctuator tryMatchPunctuators(Punctuator ... punctuators) {
-        for (Punctuator p : punctuators) {
-            if (tryMatchPunctuator(p)) return p;
-        }
+        // Array index access
+        if (b.tryConsume(Punctuator.LeftSquareBracket)) {
+            Expression index = parsePostfix();
+            b.consume(Punctuator.RightSquareBracket);
 
-        return null;
-    }
-
-    private Node getNumNode() {
-        Token t = consumeToken();
-
-        if (t instanceof LiteralToken) {
-            LiteralToken litTok = (LiteralToken) t;
-
-            int i = Integer.parseInt(litTok.getStringValue());
-
-            return new Node.IntNode(i);
+            return new ArrayAccessExpression(lhs, index);
         }
 
-        throw new RuntimeException("Should have matched against a literal node, matched against: " + t);
+        // Function call with parameters
+        if (b.tryConsume(Punctuator.LeftParenthesis)) {
+
+        }
+
+        if (b.tryConsume(Punctuator.Dot)) {
+
+        }
+
+        if (b.tryConsume(Punctuator.PointerDereference)) {
+
+        }
+
+        if (b.tryConsume(Punctuator.PlusPlus, Punctuator.MinusMinus)) {
+
+        }
+
+        return lhs;
     }
 
-    private Token consumeToken() {
-        return tokens.get(index++);
+    private Expression parsePrimary() {
+        Expression lhs = getIntExpression();
+
+        return lhs;
     }
 
-    private Token peekToken() {
-        return tokens.get(index);
-    }
+    public IntExpression getIntExpression() {
+        Token t = b.consume();
 
-    private boolean hasToken() {
-        return index < tokens.size();
+        if (t instanceof IntegerToken) {
+            IntegerToken intToken = (IntegerToken) t;
+
+            return new IntExpression(intToken);
+        }
+
+        throw new RuntimeException("Expected int token, got: " + t);
     }
 }

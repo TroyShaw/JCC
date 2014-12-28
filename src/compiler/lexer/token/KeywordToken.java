@@ -9,8 +9,16 @@ import compiler.lexer.Keyword;
  */
 public class KeywordToken extends Token {
 
+	private Keyword keyword;
+
 	public KeywordToken(Keyword keyword) {
 		super(keyword.getString());
+
+		this.keyword = keyword;
+	}
+
+	public Keyword getKeyword() {
+		return keyword;
 	}
 
 }

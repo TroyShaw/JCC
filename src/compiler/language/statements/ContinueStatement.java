@@ -8,4 +8,8 @@ public class ContinueStatement extends Statement {
     public ContinueStatement() {
         //empty
     }
+
+    public String output() {
+        return "continue;";
+    }
 }

@@ -10,4 +10,8 @@ public class DefaultStatement extends Statement {
     public DefaultStatement(Statement body) {
         this.body = body;
     }
+
+    public String output() {
+        return "default: " + body.output();
+    }
 }

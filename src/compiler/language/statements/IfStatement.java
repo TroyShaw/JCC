@@ -15,4 +15,18 @@ public class IfStatement extends Statement {
         this.ifBody = ifBody;
         this.elseBody = elseBody;
     }
+
+    public String output() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("if (").append(condition.toString()).append(")");
+        builder.append(ifBody.output());
+
+        if (elseBody != null) {
+            builder.append("else");
+            builder.append(elseBody.output());
+        }
+
+        return builder.toString();
+    }
 }

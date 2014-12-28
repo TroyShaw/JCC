@@ -15,4 +15,13 @@ public class WhileStatement extends Statement {
         this.body = body;
     }
 
+
+    public String output() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("while (").append(condition.toString()).append(")").append(";");
+        builder.append(body.output());
+
+        return builder.toString();
+    }
 }

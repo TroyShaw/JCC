@@ -14,4 +14,8 @@ public class CaseStatement extends Statement {
         this.caseExpr = caseExpr;
         this.body = body;
     }
+
+    public String output() {
+        return "case;";
+    }
 }

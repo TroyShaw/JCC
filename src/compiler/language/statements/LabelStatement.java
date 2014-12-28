@@ -20,4 +20,13 @@ public class LabelStatement extends Statement {
     public Statement getStatement() {
         return statement;
     }
+
+    public String output() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(labelName).append(":");
+        builder.append(statement.output());
+
+        return builder.toString();
+    }
 }

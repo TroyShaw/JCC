@@ -14,4 +14,8 @@ public class GotoStatement extends Statement {
     public String getGotoLabel() {
         return gotoLabel;
     }
+
+    public String output() {
+        return gotoLabel;
+    }
 }

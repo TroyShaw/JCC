@@ -27,4 +27,18 @@ public class ReturnStatement extends Statement {
     public Expression getReturnExpression() {
         return toReturn;
     }
+
+    public String output() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("return");
+
+        if (toReturn != null) {
+            builder.append(" ").append(toReturn.toString());
+        }
+
+        builder.append(";");
+
+        return builder.toString();
+    }
 }

@@ -14,4 +14,14 @@ public class DoStatement extends Statement {
         this.condition = condition;
         this.body = body;
     }
+
+    public String output() {
+        StringBuilder builder = new StringBuilder();
+
+
+        builder.append("do").append(body.output());
+        builder.append("while (").append(condition.toString()).append(")").append(";");
+
+        return "";
+    }
 }

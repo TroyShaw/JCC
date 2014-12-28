@@ -4,37 +4,47 @@ import compiler.language.expressions.Expression;
 import compiler.language.statements.*;
 import compiler.lexer.Keyword;
 import compiler.lexer.Punctuator;
+import compiler.lexer.token.Token;
+
+import java.util.List;
 
 /**
  * Created by troy on 14/11/14.
  */
 public class StatementParser {
 
+    private Parser parentParser;
+    private ParserBuffer b;
 
-    private Statement parseStatement() {
+    public StatementParser(Parser parentParser, ParserBuffer b) {
+        this.parentParser = parentParser;
+        this.b = b;
+    }
+
+    public Statement parseStatement() {
 
         //labeled statements
         //TODO identifier labels
-        if (matches(Keyword.Case)) parseCaseStatement();
-        if (matches(Keyword.Default)) parseDefaultStatement();
+        if (b.matches(Keyword.Case)) parseCaseStatement();
+        if (b.matches(Keyword.Default)) parseDefaultStatement();
 
         //jump statements
-        if (matches(Keyword.Goto)) parseGotoStatement();
-        if (matches(Keyword.Continue)) parseContinue();
-        if (matches(Keyword.Break)) parseBreak();
-        if (matches(Keyword.Return)) parseReturn();
+        if (b.matches(Keyword.Goto)) parseGotoStatement();
+        if (b.matches(Keyword.Continue)) parseContinue();
+        if (b.matches(Keyword.Break)) parseBreak();
+        if (b.matches(Keyword.Return)) parseReturn();
 
         //selection statements
-        if (matches(Keyword.If)) parseIfStatement();
-        if (matches(Keyword.Switch)) parseSwitchStatement();
+        if (b.matches(Keyword.If)) parseIfStatement();
+        if (b.matches(Keyword.Switch)) parseSwitchStatement();
 
         //iteration statements
-        if (matches(Keyword.Do)) parseDoStatement();
-        if (matches(Keyword.While)) parseWhileStatement();
-        if (matches(Keyword.For)) parseForStatement();
+        if (b.matches(Keyword.Do)) parseDoStatement();
+        if (b.matches(Keyword.While)) parseWhileStatement();
+        if (b.matches(Keyword.For)) parseForStatement();
 
         //compound statement
-        if (matches(Punctuator.LeftCurlyBracket)) parseCompoundStatement();
+        if (b.matches(Punctuator.LeftCurlyBracket)) parseCompoundStatement();
 
         //expression and null statement
 
@@ -42,15 +52,15 @@ public class StatementParser {
     }
 
     private Expression parseExpression() {
-        return null;
+        return parentParser.parseExpression();
     }
 
     private Statement parseCaseStatement() {
-        consumeKeyword(Keyword.Case);
+        b.consume(Keyword.Case);
 
         Expression constantExpr = parseExpression();
 
-        consumePunctuator(Punctuator.Colon);
+        b.consume(Punctuator.Colon);
 
         Statement caseStatement = parseStatement();
 
@@ -58,9 +68,9 @@ public class StatementParser {
     }
 
     private Statement parseDefaultStatement() {
-        consumeKeyword(Keyword.Default);
+        b.consume(Keyword.Default);
 
-        consumePunctuator(Punctuator.Colon);
+        b.consume(Punctuator.Colon);
 
         Statement caseStatement = parseStatement();
 
@@ -68,7 +78,7 @@ public class StatementParser {
     }
 
     private Statement parseGotoStatement() {
-        consumeKeyword(Keyword.Goto);
+        b.consume(Keyword.Goto);
 
         //TODO: check next token is an indentifier
         String gotoLabel = null;
@@ -77,46 +87,46 @@ public class StatementParser {
     }
 
     private Statement parseContinue() {
-        consumeKeyword(Keyword.Continue);
+        b.consume(Keyword.Continue);
 
         return new ContinueStatement();
     }
 
     private Statement parseBreak() {
-        consumeKeyword(Keyword.Break);
+        b.consume(Keyword.Break);
 
         return new BreakStatement();
     }
 
     private Statement parseReturn() {
-        consumeKeyword(Keyword.Return);
+        b.consume(Keyword.Return);
 
         //TODO: get optional expression
         Expression returnExpr = null;
 
-        consumePunctuator(Punctuator.SemiColon);
+        b.consume(Punctuator.SemiColon);
 
         return new ReturnStatement(returnExpr);
     }
 
     private Statement parseWhileStatement() {
-        consumeKeyword(Keyword.While);
-        consumePunctuator(Punctuator.LeftParenthesis);
+        b.consume(Keyword.While);
+        b.consume(Punctuator.LeftParenthesis);
         Expression condition = parseExpression();
-        consumePunctuator(Punctuator.RightParenthesis);
+        b.consume(Punctuator.RightParenthesis);
         Statement body = parseStatement();
 
         return new WhileStatement(condition, body);
     }
 
     private Statement parseDoStatement() {
-        consumeKeyword(Keyword.Do);
+        b.consume(Keyword.Do);
         Statement statement = parseStatement();
-        consumeKeyword(Keyword.While);
-        consumePunctuator(Punctuator.LeftParenthesis);
+        b.consume(Keyword.While);
+        b.consume(Punctuator.LeftParenthesis);
         Expression condition = parseExpression();
-        consumePunctuator(Punctuator.RightParenthesis);
-        consumePunctuator(Punctuator.SemiColon);
+        b.consume(Punctuator.RightParenthesis);
+        b.consume(Punctuator.SemiColon);
 
         return new DoStatement(condition, statement);
     }
@@ -126,13 +136,13 @@ public class StatementParser {
         Statement ifStatement = null;
         Statement elseStatement = null;
 
-        consumeKeyword(Keyword.If);
-        consumePunctuator(Punctuator.LeftParenthesis);
+        b.consume(Keyword.If);
+        b.consume(Punctuator.LeftParenthesis);
         condition = parseExpression();
-        consumePunctuator(Punctuator.RightParenthesis);
+        b.consume(Punctuator.RightParenthesis);
         ifStatement = parseStatement();
 
-        if (tryConsumeKeyword(Keyword.Else)) {
+        if (b.tryConsume(Keyword.Else)) {
             elseStatement = parseStatement();
         }
 
@@ -140,10 +150,10 @@ public class StatementParser {
     }
 
     private Statement parseSwitchStatement() {
-        consumeKeyword(Keyword.Switch);
-        consumePunctuator(Punctuator.LeftParenthesis);
+        b.consume(Keyword.Switch);
+        b.consume(Punctuator.LeftParenthesis);
         Expression switchExpr = parseExpression();
-        consumePunctuator(Punctuator.RightParenthesis);
+        b.consume(Punctuator.RightParenthesis);
         Statement statement = parseStatement();
 
         return new SwitchStatement(switchExpr, statement);
@@ -157,25 +167,5 @@ public class StatementParser {
 
     private Statement parseCompoundStatement() {
         return null;
-    }
-
-    private void consumeKeyword(Keyword keyword) {
-
-    }
-
-    private boolean tryConsumeKeyword(Keyword keyword) {
-        return false;
-    }
-
-    private void consumePunctuator(Punctuator punctuator) {
-
-    }
-
-    private boolean matches(Keyword keyword) {
-        return false;
-    }
-
-    private boolean matches(Punctuator punctuator) {
-        return false;
     }
 }
