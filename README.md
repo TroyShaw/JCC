@@ -2,18 +2,19 @@ JCC
 ===
 
 A C99 compiler written in Java.
-Intended to be fully compliant with the C99 spec.
+Intended to be fully compliant with the C99 specification.
 
 ###Current status 
-Writing lexer.
-Writing preprocessor
-Writing planning documentation.
+- Lexer mostly done
+- Writing parser
+  - expression parser mostly done
+  - statement parser mostly done
+  - declaration parser not done
+
+
 
 ###Todo:
-- process preprocessing directives
-- lex tokens
-- parse lexed tokens into AST
-- typecheck
-- ...
-- output assembly
+- Typechecking
+- Machine-code generation
+- Optimisation
   
