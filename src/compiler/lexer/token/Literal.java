@@ -9,5 +9,5 @@ public enum Literal {
 	Integer,
 	Floating,
 	Character,
-	String;	
+	String
 }
