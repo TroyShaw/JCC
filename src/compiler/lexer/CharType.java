@@ -93,8 +93,8 @@ public enum CharType {
 	/**
 	 * Returns true if this character matches the given character type.
 	 * 
-	 * @param c
-	 * @return
+	 * @param c the character to match
+	 * @return true if there is a match, false otherwise
 	 */
 	public abstract boolean matches(char c);
 }
