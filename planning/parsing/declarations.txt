@@ -1,0 +1,199 @@
+declaration:
+    declaration
+        declaration-specifiers init-declarator-list(opt) ; 
+
+    declaration-specifiers:
+        storage-class-specifier declaration-specifiers(opt)
+        type-specifier          declaration-specifiers(opt)
+        type-qualifier          declaration-specifiers(opt)
+        function-specifier      declaration-specifiers(opt)
+
+    init-declarator-list:
+        init-declarator
+        init-declarator-list , init-declarator
+
+    init-declarator:
+        declarator
+        declarator = initializer
+
+
+
+
+storage-class-specifier:
+    typedef
+    extern
+    static
+    auto
+    register
+
+
+type-specifier
+    void
+    char
+    short
+    int
+    long
+    float
+    double
+    signed
+    unsigned
+    _Bool
+    _Complex
+    
+    struc-or-union-specifier
+    enum-specifier
+    typedef-name
+
+
+
+
+structure and union specifier
+    struct-or-union-specifier:
+        struct-or-union identifier(opt) { struct-declaration-list }
+        struct-or-union identifier
+xzs
+    struct-or-union:
+        struct
+        union
+
+    struct-declaration-list:
+        struct-declaration
+        struct-declaration-list struct-declaration
+
+    struct-declaration:
+        specifier-qualifier-list struct-declarator-list ;
+
+    specifier-qualifier-list:
+        type-specifier specifier-qualifier-list(opt)
+        type-qualifier specifier-qualifier-list(opt)
+
+    struct-declarator-list:
+        struct-declarator
+        struct-declarator-list , struct-declarator
+
+    struct-declarator:
+        declarator
+        declarator(opt) : constant-expression
+
+
+
+
+enumeration specifier
+    enum-specifier:
+        enum identifier(opt) { enumerator-list }
+        enum identifier(opt) { enumerator-list , }
+        enum identifier
+
+    enumerator-list:
+        enumerator
+        enumerator-list , enumerator
+
+    enumerator-constant
+        enumeration-constant
+        enumeration-constant = constant-expression
+
+
+
+Type qualifiers
+    type-qualifier:
+        const
+        restrict
+        volatile
+
+
+
+Function Specifier
+    function-specifier:
+        inline
+
+
+
+
+
+Declarators
+    declarator:
+        pointer(opt) direct-declarator
+
+    direct-declarator:
+        identifier
+        ( declarator )
+        direct-declarator [ ]
+        direct-declarator [ ]
+        direct-declarator [ ]
+        direct-declarator [ ]
+        direct-declarator ( )
+        direct-declarator ( )
+
+    pointer:
+        * type-qualifier-list(opt)
+        * type-qualifier-list(opt) pointer
+
+    type-qualifier-list:
+        type-qualifier
+        type-qualifier-list type-qualifier
+
+    parameter-type-list:
+        parameter-list
+        parameter-list , ...
+
+    parameter-list:
+        parameter-declaration
+        parameter-list , parameter-declaration
+
+    parameter-declaration:
+        declaration-specifiers declarator
+        declaration-specifiers abstract-declarator(opt)
+
+    identifier-list:
+        identifier
+        identifier-list, identifier
+
+
+
+
+
+Type names
+    type-name:
+        specifier-qualifier-list abstract-declarator(opt)
+
+    abstract-declarator:
+        pointer
+        pointer(opt) direct-abstract-declarator
+
+    direct-abstract-declarator:
+        ( abstract-declarator )
+        direct-abstract-declarator(opt) [ type-qualifier-list(opt)        assignment-expression(opt) ]
+        direct-abstract-declarator(opt) [ static type-qualifier-list(opt) assignment-expression      ]
+        direct-abstract-declarator(opt) [ type-qualifier-list static      assignment-expression      ]
+        direct-abstract-declarator(opt) [ * ]
+        direct-abstract-declarator(opt) ( parameter-type-list(opt) )
+
+
+
+Type definition
+    typedef-name:
+        identifier
+
+
+
+
+Initialization
+    initializer:
+        assignment-expression
+        { initializer-list }
+        { initializer-list , }
+
+    initializer-list:
+        designation(opt) initializer
+        initializer-list , designation(opt) initializer
+
+    designation:
+        designator-list = 
+
+    designator-list:
+        designator
+        designator-list designator
+
+    designator:
+        [ constant-expression ]
+        . identifier
